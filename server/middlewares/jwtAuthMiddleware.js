@@ -33,19 +33,28 @@ const jwtAuthMiddleware = (req, res, next) => {
 
 // For SOCKET requests
 const sockettAuthMiddleware = (socket, next) => {
-  const token = socket.handshake.headers.cookie
-    .split('; ')
-    .find((cookie) => cookie.startsWith('jwttoken='))
-    .split('=')[1];
-  if (!token) {
-    return next(new Error('Access Denied: No Token Provided'));
-  }
+  try {
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-    if (err) return next(new Error('Invalid Token'));
-    socket.user = decoded; // Attach user details from the token to the socket object
+    let token =
+      socket.handshake.auth?.token ||
+      socket.handshake.headers.cookie
+        ?.split("; ")
+        .find((c) => c.startsWith("jwttoken="))
+        ?.split("=")[1];
+
+    if (!token) {
+      return next(new Error("Authentication error"));
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    socket.user = decoded;
+
     next();
-  });
+
+  } catch (err) {
+    return next(new Error("Invalid Token"));
+  }
 };
 
 

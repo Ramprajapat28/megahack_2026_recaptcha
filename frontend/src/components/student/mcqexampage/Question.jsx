@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
-import io from "socket.io-client";
+
 import {
   setSelectedOption,
   visitQuestion,
@@ -14,8 +14,8 @@ import {
 import { clearExamId } from "../../../redux/ExamSlice";
 import { useLocation, useNavigate } from "react-router-dom";
 
-const Question = () => {
-  const socketRef = useRef(null);
+const Question = ({ socketRef, remainingTime }) => {
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -31,7 +31,6 @@ const Question = () => {
   // Local state for multiple options, text answers, and socket timer
   const [multipleAnswers, setMultipleAnswers] = useState({});
   const [textAnswers, setTextAnswers] = useState({});
-  const [remainingTime, setRemainingTime] = useState(0);
   const [timeUp, setTimeUp] = useState(false);
   const [testSubmitted, setTestSubmitted] = useState(false);
 
@@ -62,7 +61,7 @@ const Question = () => {
   const handleSubmitTest = async () => {
     setTestSubmitted(true);
     await submitFinalResponse();
-    socketRef.current?.emit("submit_responses");
+    socketRef.current?.emit("submit_responses", { exam_id: examId });
     dispatch(clearExamId(examId));
     dispatch(clearQuestions());
     alert("Test submitted successfully!");
@@ -70,53 +69,11 @@ const Question = () => {
   };
 
   // Socket connection and timer management
-  useEffect(() => {
-    const socketConnect = async () => {
-      if (!socketRef.current) {
-        const API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
-        socketRef.current = io(`${API_BASE_URL}/exams/start-exam`, {
-          withCredentials: true,
-        });
-      }
 
-      const socket = socketRef.current;
-      socket.emit("start_exam", {
-        exam_id: examId,
-        duration: Duration * 60,
-      });
-
-      socket.on("already_active", ({ message }) => {
-        alert(message || "Already logged in for this exam.");
-        navigate("/home", { replace: true });
-      });
-
-      socket.on("timer_update", (data) => setRemainingTime(data.remainingTime));
-      socket.on("exam_ended", () => {
-        submitFinalResponse();
-        setTimeUp(true);
-      });
-
-      return () => {
-        if (socketRef.current) {
-          socketRef.current.off("connect");
-          socketRef.current.off("timer_update");
-          socketRef.current.off("exam_ended");
-          socketRef.current.disconnect();
-        }
-      };
-    };
-    socketConnect();
-
-    return () => {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-      }
-    };
-  }, [examId, Duration]);
 
   // Handle time up
   useEffect(() => {
-    if (timeUp) handleSubmitTest();
+    if (timeUp && !isSubmitting) handleSubmitTest(questions);
   }, [timeUp]);
 
   // Initialize local state with existing answers (for when user returns after internet issues)
@@ -208,31 +165,7 @@ const Question = () => {
     await axios.put(url, payload, { withCredentials: true });
   };
 
-  const multipleResponse = async (options, id, question_type) => {
-    const API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
-    const url = `${API_BASE_URL}/api/exams/responses/${examId}`;
-    const payload = {
-      question_id: id,
-      selected_option: null,
-      selected_options: options,
-      text_answer: null,
-      question_type,
-    };
-    await axios.put(url, payload, { withCredentials: true });
-  };
 
-  const textResponse = async (text, id, question_type) => {
-    const API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
-    const url = `${API_BASE_URL}/api/exams/responses/${examId}`;
-    const payload = {
-      question_id: id,
-      selected_option: null,
-      selected_options: null,
-      text_answer: text,
-      question_type,
-    };
-    await axios.put(url, payload, { withCredentials: true });
-  };
 
   // Function to save pending response to backend with duplicate request prevention
   const savePendingResponse = async () => {
@@ -363,7 +296,10 @@ const Question = () => {
                   onChange={() => handleOptionSelect(key)}
                   className="w-5 h-5 text-blue-600 focus:ring-blue-500"
                 />
-                <span className="ml-3 text-gray-700 text-base">{value}</span>
+                <span className="ml-3 text-gray-700 text-base">
+                  {value}
+                </span>
+
               </label>
             ))}
           </div>

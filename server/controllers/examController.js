@@ -534,20 +534,18 @@ const getPaginatedPastExams = async (req, res) => {
 
 
 
-
-
 const getExamsForUser = async (req, res) => {
   const user_id = req.user.id;
 
-  const { status, target_branches, target_years } = req.query; //
-  // console.log('status, target_branches, target_year', status, target_branches, target_years);
+  const { status, target_branches, target_years } = req.query;
+
+  // console.log("Query params:", req.query);
 
   try {
     const exams = await examModel.getExamsForUser(
       status,
       target_branches,
-      target_years,
-      user_id
+      target_years
     );
 
     await logActivity({
@@ -559,9 +557,10 @@ const getExamsForUser = async (req, res) => {
 
     res.status(200).json({
       message: 'Exams for user retrieved successfully',
-      exams: exams.rows || [],
-      count: exams.rowCount || 0,
+      exams,
+      count: exams.length,
     });
+
   } catch (error) {
     console.error('Error fetching exams for user:', error.message);
 

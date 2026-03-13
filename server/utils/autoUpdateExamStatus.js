@@ -8,7 +8,7 @@ let isRunning = false;
 
 console.log("⏰ Exam status cron initialized");
 
-const autoUpdate = cron.schedule("*/5 * * * *", async () => {
+const autoUpdate = cron.schedule("* * * * *", async () => {
 
   if (isRunning) {
     console.log("⚠️ Previous cron still running. Skipping...");
@@ -23,7 +23,7 @@ const autoUpdate = cron.schedule("*/5 * * * *", async () => {
 
     const result = await dbWrite("exams")
       .where("status", "live")
-      .andWhere("end_time", "<", dbWrite.fn.now())
+      .andWhere("end_time", "<", dbWrite.raw("NOW() AT TIME ZONE 'UTC'"))
       .update({ status: "past" })
       .returning(["exam_id", "exam_for", "exam_name"]);
 

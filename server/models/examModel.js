@@ -67,6 +67,42 @@ const getExamsByStatus = async (status, role, branch, yearFilter) => {
   }
 };
 
+const getExamsForUser = async (status, branches, years) => {
+
+  let query = dbWrite("exams")
+    .select(
+      "exam_id",
+      "exam_name",
+      "duration",
+      "start_time",
+      "end_time",
+      "status"
+    )
+    .where("status", status);
+
+  if (branches?.length) {
+    query.whereRaw(
+      "target_branches && ARRAY[?]::branch_enum[]",
+      [branches[0]]
+    );
+  }
+
+  if (years?.length) {
+    query.whereRaw(
+      "target_years && ARRAY[?]::year_enum[]",
+      [years[0]]
+    );
+  }
+
+  console.log("Generated SQL:", query.toString());
+
+  const exams = await query.orderBy("start_time", "asc");
+
+  console.log("Exams Found:", exams);
+
+  return exams;
+};
+
 
 const getPaginatedExams = async (page, limit, status, role, branch, yearFilter) => {
   try {
@@ -323,5 +359,6 @@ module.exports = {
   getAllScheduledExams,
   getExamsByTeacherId,
   getExamsByStatus,
-  getPaginatedExams
+  getPaginatedExams,
+  getExamsForUser
 };
