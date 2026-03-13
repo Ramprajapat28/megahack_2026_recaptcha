@@ -141,6 +141,20 @@ def read_root():
     with open(html_path, 'r', encoding='utf-8') as f:
         return HTMLResponse(content=f.read())
 
+@app.get("/interview", response_class=HTMLResponse)
+def interview_page():
+    """Serves the Voice AI Interviewer UI"""
+    html_path = os.path.join(os.path.dirname(__file__), 'ai-interview', 'index.html')
+    with open(html_path, 'r', encoding='utf-8') as f:
+        return HTMLResponse(content=f.read())
+
+@app.get("/tutor", response_class=HTMLResponse)
+def tutor_page():
+    """Serves the AI Tutor UI"""
+    html_path = os.path.join(os.path.dirname(__file__), 'ai-tutor', 'index.html')
+    with open(html_path, 'r', encoding='utf-8') as f:
+        return HTMLResponse(content=f.read())
+
 @app.get("/info")
 def api_info():
     return {

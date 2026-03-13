@@ -3,50 +3,51 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Tutor</title>
+  <title>AI Tutor | MegaHack 2026</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: 'Inter', system-ui, sans-serif;
-      background: #f5f5f7;
+      background: #f0f2f5;
       color: #1d1d1f;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 64px 20px 60px;
+      padding: 48px 20px 80px;
     }
 
-    /* ── Header ── */
-    header {
-      text-align: center;
-      margin-bottom: 40px;
-    }
-    header h1 {
-      font-size: 32px;
+    header { text-align: center; margin-bottom: 32px; }
+    header h1 { font-size: 30px; font-weight: 700; letter-spacing: -0.5px; }
+    header p { margin-top: 6px; font-size: 15px; color: #6e6e73; }
+
+    /* Depth badge */
+    .depth-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
       font-weight: 600;
-      letter-spacing: -0.6px;
-      color: #1d1d1f;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
     }
-    header p {
-      margin-top: 8px;
-      font-size: 15px;
-      color: #86868b;
-      font-weight: 400;
-    }
+    .depth-badge.simple { background: #e3f0ff; color: #0071e3; }
+    .depth-badge.detailed { background: #e8f8ef; color: #1c7d44; }
 
-    /* ── Mode Toggle ── */
+    /* Mode Toggle */
     .mode-toggle {
       display: flex;
       background: #e5e5ea;
       border-radius: 10px;
       padding: 3px;
       gap: 2px;
-      margin-bottom: 28px;
-      width: fit-content;
+      margin-bottom: 24px;
     }
     .mode-btn {
       padding: 7px 20px;
@@ -60,24 +61,20 @@
       cursor: pointer;
       transition: all 0.2s;
     }
-    .mode-btn.active {
-      background: #fff;
-      color: #1d1d1f;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.10);
-    }
+    .mode-btn.active { background: #fff; color: #1d1d1f; box-shadow: 0 1px 4px rgba(0,0,0,0.10); }
 
-    /* ── Input Card ── */
+    /* Input Card */
     .input-card {
       width: 100%;
-      max-width: 600px;
+      max-width: 680px;
       background: #fff;
       border: 1px solid #d2d2d7;
       border-radius: 14px;
-      padding: 16px 18px;
+      padding: 14px 18px;
       display: flex;
       align-items: center;
       gap: 10px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
       transition: border-color 0.2s;
     }
     .input-card:focus-within { border-color: #0071e3; }
@@ -93,56 +90,45 @@
     }
     input#query::placeholder { color: #adadb8; }
 
-    /* Clear button */
     #clearBtn {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      border: none;
-      background: #d2d2d7;
-      color: #636366;
-      font-size: 13px;
-      line-height: 1;
-      cursor: pointer;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      transition: background 0.15s;
+      width: 22px; height: 22px;
+      border-radius: 50%; border: none;
+      background: #d2d2d7; color: #636366;
+      font-size: 12px; cursor: pointer;
+      display: none; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: background 0.15s;
     }
     #clearBtn:hover { background: #c7c7cc; }
     #clearBtn.visible { display: flex; }
 
-    /* Divider */
-    .divider {
-      width: 1px;
-      height: 22px;
-      background: #d2d2d7;
-      flex-shrink: 0;
-    }
+    .divider { width: 1px; height: 22px; background: #d2d2d7; flex-shrink: 0; }
 
-    /* Ask button */
     #askBtn {
       padding: 8px 18px;
-      border-radius: 8px;
-      border: none;
-      background: #0071e3;
-      color: #fff;
+      border-radius: 8px; border: none;
+      background: #0071e3; color: #fff;
       font-family: 'Inter', sans-serif;
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background 0.2s;
-      flex-shrink: 0;
+      font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: background 0.2s; flex-shrink: 0;
     }
     #askBtn:hover { background: #0077ed; }
     #askBtn:disabled { background: #b9d3f3; cursor: not-allowed; }
 
-    /* ── Voice Panel ── */
+    /* Hint text below input */
+    .hint-text {
+      font-size: 12px;
+      color: #adadb8;
+      margin-top: 8px;
+      text-align: center;
+      max-width: 680px;
+    }
+    .hint-text span { font-weight: 500; color: #6e6e73; }
+
+    /* Voice Panel */
     #voicePanel {
       display: none;
       width: 100%;
-      max-width: 600px;
+      max-width: 680px;
       flex-direction: column;
       align-items: center;
       gap: 16px;
@@ -159,94 +145,50 @@
       flex-direction: column;
       align-items: center;
       gap: 14px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
     }
-
     #micBtn {
-      width: 72px;
-      height: 72px;
-      border-radius: 50%;
-      border: none;
-      background: #f2f2f7;
-      color: #1d1d1f;
-      font-size: 28px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-      position: relative;
+      width: 72px; height: 72px;
+      border-radius: 50%; border: none;
+      background: #f2f2f7; color: #1d1d1f;
+      font-size: 28px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s; position: relative;
     }
     #micBtn:hover { background: #e5e5ea; }
-    #micBtn.listening {
-      background: #ff3b30;
-      color: white;
-    }
+    #micBtn.listening { background: #ff3b30; color: white; }
     #micBtn.listening::before {
       content: '';
       position: absolute;
       border-radius: 50%;
-      width: 100%;
-      height: 100%;
+      width: 100%; height: 100%;
       background: rgba(255, 59, 48, 0.25);
       animation: ripple 1.4s ease-out infinite;
     }
+    @keyframes ripple { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(2.2); opacity: 0; } }
 
-    @keyframes ripple {
-      0%   { transform: scale(1);   opacity: 1; }
-      100% { transform: scale(2.2); opacity: 0; }
-    }
-
-    #micStatus {
-      font-size: 14px;
-      color: #86868b;
-      text-align: center;
-    }
+    #micStatus { font-size: 14px; color: #86868b; text-align: center; }
     #micStatus.listening { color: #ff3b30; font-weight: 500; }
-
-    #transcriptPreview {
-      font-size: 15px;
-      color: #1d1d1f;
-      text-align: center;
-      font-style: italic;
-      min-height: 22px;
-    }
-
+    #transcriptPreview { font-size: 15px; color: #1d1d1f; text-align: center; font-style: italic; min-height: 22px; }
     #voiceAskBtn {
-      padding: 10px 28px;
-      border-radius: 8px;
-      border: none;
-      background: #0071e3;
-      color: #fff;
-      font-family: 'Inter', sans-serif;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background 0.2s;
-      display: none;
+      padding: 10px 28px; border-radius: 8px; border: none;
+      background: #0071e3; color: #fff;
+      font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 500;
+      cursor: pointer; transition: background 0.2s; display: none;
     }
     #voiceAskBtn.show { display: block; }
     #voiceAskBtn:hover { background: #0077ed; }
+    #browserWarn { font-size: 13px; color: #ff3b30; display: none; text-align: center; }
 
-    /* Browser warning */
-    #browserWarn {
-      font-size: 13px;
-      color: #ff3b30;
-      display: none;
-      text-align: center;
-    }
-
-    /* ── Loading ── */
+    /* Loading */
     #loadingRow {
       display: none;
-      max-width: 600px;
+      max-width: 680px;
       width: 100%;
       margin-top: 28px;
       align-items: center;
       gap: 10px;
     }
     #loadingRow.show { display: flex; }
-
     .spinner {
       width: 16px; height: 16px;
       border: 2px solid #d2d2d7;
@@ -257,73 +199,119 @@
     #loadingRow span { font-size: 14px; color: #86868b; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── Response Card ── */
+    /* Response Card */
     #responseCard {
       display: none;
       width: 100%;
-      max-width: 600px;
+      max-width: 680px;
       margin-top: 28px;
       background: #fff;
       border: 1px solid #d2d2d7;
-      border-radius: 14px;
+      border-radius: 16px;
       overflow: hidden;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
     }
 
-    .r-topic-bar {
-      padding: 14px 22px;
+    .r-header {
+      padding: 16px 24px;
       border-bottom: 1px solid #f0f0f5;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      background: #fafafa;
     }
-    .r-topic-bar span {
-      font-size: 12px;
+    .r-header strong { font-size: 16px; font-weight: 600; color: #1d1d1f; }
+
+    .r-body { padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+
+    /* Explanation section */
+    .r-section { display: flex; flex-direction: column; gap: 6px; }
+    .r-label {
+      font-size: 10px;
       text-transform: uppercase;
-      letter-spacing: 0.8px;
-      color: #86868b;
-    }
-    .r-topic-bar strong {
-      font-size: 15px;
+      letter-spacing: 1px;
+      color: #adadb8;
       font-weight: 600;
-      color: #1d1d1f;
     }
+    .r-text { font-size: 15px; line-height: 1.8; color: #1d1d1f; }
 
-    .r-body { padding: 22px 24px; }
-
-    /* Unified explanation + examples as flowing prose */
-    .r-explanation {
-      font-size: 15.5px;
-      line-height: 1.8;
-      color: #1d1d1f;
-      font-weight: 400;
-    }
-
-    .r-example {
-      margin-top: 14px;
-      font-size: 14.5px;
-      line-height: 1.7;
-      color: #3a3a3c;
-      padding: 14px 18px;
+    /* Example box */
+    .r-example-box {
       background: #f5f5f7;
       border-radius: 10px;
       border-left: 3px solid #0071e3;
+      padding: 14px 18px;
+      font-size: 14.5px;
+      line-height: 1.7;
+      color: #3a3a3c;
     }
 
-    .r-example-label {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.9px;
-      color: #adadb8;
-      margin-bottom: 6px;
+    /* Steps list */
+    .r-steps { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+    .r-steps li {
+      display: flex;
+      gap: 12px;
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: #1d1d1f;
+      align-items: flex-start;
     }
+    .r-steps li .step-num {
+      flex-shrink: 0;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: #0071e3;
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      margin-top: 2px;
+    }
+
+    /* Code block */
+    .r-code {
+      background: #1c1c1e;
+      border-radius: 10px;
+      padding: 16px 18px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      line-height: 1.7;
+      color: #d4d4d4;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    /* Warning / mistake box */
+    .r-warning-box {
+      background: #fff8f0;
+      border-left: 3px solid #ff9500;
+      border-radius: 10px;
+      padding: 13px 18px;
+      font-size: 14px;
+      line-height: 1.65;
+      color: #3a3a3c;
+    }
+
+    /* Key point */
+    .r-key-point {
+      background: #edf4ff;
+      border-radius: 10px;
+      padding: 13px 18px;
+      font-size: 14.5px;
+      font-weight: 500;
+      color: #0044bb;
+      line-height: 1.65;
+      border: 1px solid #c5dcff;
+    }
+
   </style>
 </head>
 <body>
 
   <header>
-    <h1>AI Tutor</h1>
-    <p>Ask anything — type it or say it.</p>
+    <h1>🎓 AI Tutor</h1>
+    <p>Ask simply for a quick answer, ask in detail for a full breakdown.</p>
   </header>
 
   <!-- Mode Toggle -->
@@ -334,11 +322,14 @@
 
   <!-- TEXT MODE -->
   <div class="input-card" id="textPanel">
-    <input id="query" type="text" placeholder="e.g. Explain binary search…" autocomplete="off" />
+    <input id="query" type="text" placeholder='e.g. "Simply explain recursion" or "Explain binary search in detail"' autocomplete="off" />
     <button id="clearBtn" title="Clear">✕</button>
     <div class="divider"></div>
     <button id="askBtn">Ask</button>
   </div>
+  <p class="hint-text" id="textHint">
+    Tip: start with <span>"simply explain…"</span> for a quick answer or <span>"explain in detail…"</span> for a full breakdown with examples.
+  </p>
 
   <!-- VOICE MODE -->
   <div id="voicePanel">
@@ -354,37 +345,32 @@
   <!-- Loading -->
   <div id="loadingRow">
     <div class="spinner"></div>
-    <span>Thinking…</span>
+    <span id="loadingText">Thinking…</span>
   </div>
 
   <!-- Response -->
   <div id="responseCard">
-    <div class="r-topic-bar">
-      <span>Topic</span>
+    <div class="r-header">
       <strong id="rTopic"></strong>
+      <div id="rDepthBadge"></div>
     </div>
-    <div class="r-body">
-      <p class="r-explanation" id="rExplanation"></p>
-      <div id="rExampleWrap" style="display:none">
-        <p class="r-example-label" style="margin-top:18px">Example</p>
-        <div class="r-example" id="rExample"></div>
-      </div>
+    <div class="r-body" id="rBody">
+      <!-- populated by JS -->
     </div>
   </div>
 
 <script>
-const API = 'http://127.0.0.1:8000';
+const API = '';
 let currentMode = 'text';
 let capturedTranscript = '';
 
-// ── Mode switching ────────────────────────────────────────────
 function setMode(m) {
   currentMode = m;
   document.getElementById('modeText').classList.toggle('active', m === 'text');
   document.getElementById('modeVoice').classList.toggle('active', m === 'voice');
   document.getElementById('textPanel').style.display = m === 'text' ? 'flex' : 'none';
+  document.getElementById('textHint').style.display = m === 'text' ? 'block' : 'none';
   document.getElementById('voicePanel').classList.toggle('show', m === 'voice');
-  // reset voice state
   if (m === 'voice') {
     capturedTranscript = '';
     document.getElementById('transcriptPreview').textContent = '';
@@ -394,10 +380,10 @@ function setMode(m) {
   }
 }
 
-// ── Text mode ─────────────────────────────────────────────────
+// Text mode
 const queryEl = document.getElementById('query');
 const clearBtn = document.getElementById('clearBtn');
-const askBtn   = document.getElementById('askBtn');
+const askBtn = document.getElementById('askBtn');
 
 queryEl.addEventListener('input', () => {
   clearBtn.classList.toggle('visible', queryEl.value.length > 0);
@@ -413,7 +399,7 @@ askBtn.addEventListener('click', () => {
 });
 queryEl.addEventListener('keydown', e => { if (e.key === 'Enter') askBtn.click(); });
 
-// ── Voice mode ────────────────────────────────────────────────
+// Voice mode
 const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
 const micBtn = document.getElementById('micBtn');
 const micStatus = document.getElementById('micStatus');
@@ -426,31 +412,27 @@ if (!SpeechRec) {
   document.getElementById('browserWarn').style.display = 'block';
   micBtn.disabled = true;
 } else {
-  // Setup recognition — reuse the same instance to minimise permission prompts
   recognition = new SpeechRec();
-  recognition.continuous = false;       // single utterance for precision
-  recognition.interimResults = true;    // show live transcript as you speak
+  recognition.continuous = false;
+  recognition.interimResults = true;
   recognition.lang = 'en-US';
   recognition.maxAlternatives = 1;
 
   micBtn.addEventListener('click', () => {
-    if (isListening) {
-      recognition.stop();               // user clicks again → confirm & stop
-    } else {
+    if (isListening) { recognition.stop(); }
+    else {
       capturedTranscript = '';
       transcriptPreview.textContent = '';
       voiceAskBtn.classList.remove('show');
       recognition.start();
     }
   });
-
   recognition.onstart = () => {
     isListening = true;
     micBtn.classList.add('listening');
     micStatus.textContent = '🔴 Listening… speak clearly';
     micStatus.className = 'listening';
   };
-
   recognition.onresult = (e) => {
     let interim = '', final = '';
     for (let i = e.resultIndex; i < e.results.length; i++) {
@@ -461,12 +443,7 @@ if (!SpeechRec) {
     transcriptPreview.textContent = display ? `"${display}"` : '';
     if (final) capturedTranscript = final;
   };
-
-  recognition.onspeechend = () => {
-    // Speech ended — stop and confirm
-    recognition.stop();
-  };
-
+  recognition.onspeechend = () => recognition.stop();
   recognition.onend = () => {
     isListening = false;
     micBtn.classList.remove('listening');
@@ -479,28 +456,21 @@ if (!SpeechRec) {
       micStatus.className = '';
     }
   };
-
   recognition.onerror = (e) => {
     isListening = false;
     micBtn.classList.remove('listening');
-    const msgs = {
-      'not-allowed': '🔒 Mic blocked — allow it in browser settings.',
-      'no-speech':   'No speech detected — try again.',
-      'network':     'Network error — check connection.'
-    };
+    const msgs = { 'not-allowed': '🔒 Mic blocked — allow it in browser settings.', 'no-speech': 'No speech detected — try again.', 'network': 'Network error — check connection.' };
     micStatus.textContent = msgs[e.error] || `Error: ${e.error}`;
     micStatus.className = '';
   };
-
   voiceAskBtn.addEventListener('click', () => {
     const q = capturedTranscript.trim();
     if (q) submitQuery(q, 'voice');
   });
 }
 
-// ── Core: send query ──────────────────────────────────────────
 async function submitQuery(query, mode) {
-  showLoading();
+  showLoading(mode);
 
   const endpoint = mode === 'voice'
     ? `${API}/api/tutor/explain-voice`
@@ -510,7 +480,7 @@ async function submitQuery(query, mode) {
     : { query };
 
   try {
-    const res  = await fetch(endpoint, {
+    const res = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
@@ -524,29 +494,82 @@ async function submitQuery(query, mode) {
   }
 }
 
-// ── Render response ───────────────────────────────────────────
 function render(d) {
   hideLoading();
+
+  const depth = d.depth || d.detected_depth || 'simple';
   const card = document.getElementById('responseCard');
   card.style.display = 'block';
 
   document.getElementById('rTopic').textContent = d.topic || '—';
-  document.getElementById('rExplanation').textContent = d.explanation || '';
 
-  const wrap = document.getElementById('rExampleWrap');
-  const exEl = document.getElementById('rExample');
-  if (d.example) {
-    exEl.textContent = d.example;
-    wrap.style.display = 'block';
+  // Depth badge
+  const badge = document.getElementById('rDepthBadge');
+  const isDetailed = depth === 'detailed';
+  badge.innerHTML = `<span class="depth-badge ${depth}">${isDetailed ? '📖 Detailed' : '⚡ Simple'}</span>`;
+
+  const body = document.getElementById('rBody');
+  body.innerHTML = '';
+
+  // ── EXPLANATION (always present)
+  body.appendChild(makeSection('Explanation', `<p class="r-text">${esc(d.explanation)}</p>`));
+
+  if (isDetailed) {
+    // ── HOW IT WORKS (steps)
+    if (d.how_it_works) {
+      const steps = d.how_it_works.split('\n').filter(s => s.trim());
+      const list = steps.map((s, i) =>
+        `<li><span class="step-num">${i+1}</span><span>${esc(s.replace(/^\d+\.\s*/, ''))}</span></li>`
+      ).join('');
+      body.appendChild(makeSection('How it works', `<ul class="r-steps">${list}</ul>`));
+    }
+
+    // ── EXAMPLE
+    if (d.example) {
+      body.appendChild(makeSection('Real-world Example', `<div class="r-example-box">${esc(d.example)}</div>`));
+    }
+
+    // ── CODE EXAMPLE
+    if (d.code_example && d.code_example.trim()) {
+      body.appendChild(makeSection('Code Example', `<pre class="r-code">${esc(d.code_example)}</pre>`));
+    }
+
+    // ── COMMON MISTAKES
+    if (d.common_mistakes) {
+      body.appendChild(makeSection('⚠️ Common Mistake',
+        `<div class="r-warning-box">${esc(d.common_mistakes)}</div>`));
+    }
+
   } else {
-    wrap.style.display = 'none';
+    // Simple: just example
+    if (d.example) {
+      body.appendChild(makeSection('Example', `<div class="r-example-box">${esc(d.example)}</div>`));
+    }
+  }
+
+  // ── KEY POINT (always)
+  if (d.key_point) {
+    body.appendChild(makeSection('💡 Key Takeaway',
+      `<div class="r-key-point">${esc(d.key_point)}</div>`));
   }
 
   card.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-// ── Helpers ───────────────────────────────────────────────────
-function showLoading() {
+function makeSection(label, innerHtml) {
+  const div = document.createElement('div');
+  div.className = 'r-section';
+  div.innerHTML = `<p class="r-label">${label}</p>${innerHtml}`;
+  return div;
+}
+
+function esc(str) {
+  return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+
+function showLoading(mode) {
+  document.getElementById('loadingText').textContent =
+    mode === 'voice' ? 'Analysing voice input…' : 'Thinking…';
   document.getElementById('loadingRow').classList.add('show');
   askBtn.disabled = true;
   voiceAskBtn.classList.remove('show');

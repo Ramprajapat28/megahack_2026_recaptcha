@@ -1,5 +1,6 @@
 import os
 import json
+import re
 from typing import List, Optional
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
@@ -23,27 +24,37 @@ chat_model = ChatGroq(
 )
 
 # =========================================================
-# SYSTEM PROMPTS
+# UTILITY: Detect response depth from query phrasing
 # =========================================================
 
-TUTOR_SYSTEM_PROMPT = """
-You are a friendly AI Tutor. Explain concepts in the simplest, clearest way possible — like a mentor talking to a student.
-Always use plain language. Avoid jargon. Use relatable real-world examples.
-Return pure valid JSON only. Do NOT wrap in markdown blocks.
-"""
+SIMPLE_KEYWORDS = [
+    "simply", "simple", "briefly", "quick", "short", "tldr",
+    "tl;dr", "in short", "summarize", "summary", "one line",
+    "what is", "define", "definition", "meaning of", "what does"
+]
 
-USER_PROMPT = """
-The student wants to learn about: {query}
+DETAILED_KEYWORDS = [
+    "detail", "detailed", "explain in detail", "elaborate", "depth",
+    "in depth", "deeply", "thoroughly", "step by step", "how does",
+    "how to", "example", "with example", "demonstrate", "walk me through",
+    "teach me", "learn", "understand", "implement", "code", "code example"
+]
 
-Explain it simply in 2-3 sentences. Then give one short, relatable real-world example.
+def _detect_depth(query: str) -> str:
+    """
+    Detects whether the student wants a simple or detailed response.
+    Returns: 'simple' or 'detailed'
+    """
+    q_lower = query.lower()
+    
+    detail_score = sum(1 for kw in DETAILED_KEYWORDS if kw in q_lower)
+    simple_score = sum(1 for kw in SIMPLE_KEYWORDS if kw in q_lower)
 
-Return ONLY this JSON:
-{{
-  "topic": "{query}",
-  "explanation": "A simple, conversational explanation in 2-3 sentences. No bullet points.",
-  "example": "One clear, relatable real-world example that makes the concept click."
-}}
-"""
+    # Default to detailed (more teaching value) if neither or tie
+    if simple_score > detail_score:
+        return "simple"
+    return "detailed"
+
 
 # =========================================================
 # UTILITY: Clean LLM JSON output
@@ -61,23 +72,73 @@ def _clean_json(raw: str) -> dict:
 
 
 # =========================================================
-# FEATURE 1: Teach a concept (text or voice input)
+# PROMPTS
+# =========================================================
+
+SIMPLE_PROMPT = """
+The student wants a SIMPLE & QUICK explanation of: {query}
+
+Give a clear, concise explanation in 2-3 sentences max. No jargon.
+Also give ONE short real-world analogy or example to help it click.
+
+Return ONLY this JSON (pure JSON, no markdown):
+{{
+  "topic": "{query}",
+  "depth": "simple",
+  "explanation": "Clear 2-3 sentence explanation in plain language.",
+  "example": "One short, relatable real-world analogy or example.",
+  "key_point": "The single most important thing to remember about this topic."
+}}
+"""
+
+DETAILED_PROMPT = """
+The student wants a DETAILED explanation of: {query}
+
+Teach this topic thoroughly, like a senior developer or professor would explain to a student.
+
+Return ONLY this JSON (pure JSON, no markdown):
+{{
+  "topic": "{query}",
+  "depth": "detailed",
+  "explanation": "A comprehensive explanation covering what it is, why it matters, and when to use it. 4-6 sentences.",
+  "how_it_works": "Step-by-step breakdown of how it works internally. Use numbered steps as a single string separated by \\n.",
+  "example": "A detailed, realistic real-world example or scenario that shows the concept in action.",
+  "code_example": "A short code snippet demonstrating the concept (if applicable, else empty string).",
+  "common_mistakes": "The most common mistake beginners make with this topic.",
+  "key_point": "The single most important takeaway about this topic."
+}}
+"""
+
+SYSTEM_PROMPT = """
+You are Antigravity AI Tutor — a friendly, expert teacher.
+Explain concepts with precision and clarity, adapting your depth based on the instruction.
+Always return pure valid JSON only. Never use markdown code blocks.
+"""
+
+
+# =========================================================
+# FEATURE 1: Teach a concept (auto-detects depth)
 # =========================================================
 
 def teach_concept(query: str) -> dict:
     """
     Takes a student's question/topic and returns a structured teaching response.
-    Also includes related_topics for the student to explore next.
+    Automatically detects if the student wants a simple or detailed answer.
     """
+    depth = _detect_depth(query)
+    user_prompt = SIMPLE_PROMPT if depth == "simple" else DETAILED_PROMPT
+
     prompt_template = ChatPromptTemplate.from_messages([
-        ("system", TUTOR_SYSTEM_PROMPT),
-        ("human", USER_PROMPT)
+        ("system", SYSTEM_PROMPT),
+        ("human", user_prompt)
     ])
     chain = prompt_template | chat_model | StrOutputParser()
 
     try:
         response_text = chain.invoke({"query": query})
-        return _clean_json(response_text)
+        result = _clean_json(response_text)
+        result["detected_depth"] = depth  # Pass depth to frontend for rendering
+        return result
     except json.JSONDecodeError as e:
         raise ValueError(f"AI Tutor returned invalid JSON. Error: {str(e)}")
     except Exception as e:
@@ -93,16 +154,6 @@ def answer_followup(
     followup_question: str,
     chat_history: Optional[List[dict]] = None
 ) -> dict:
-    """
-    Handles follow-up questions from the student within the context of a topic.
-    Uses chat history to maintain conversation context.
-    
-    chat_history format:
-        [
-          {"role": "human", "content": "What is Binary Search?"},
-          {"role": "ai", "content": "Binary search is..."}
-        ]
-    """
     system = f"""
 You are Antigravity AI Tutor. A student is learning about: {topic}.
 Answer follow-up questions clearly and simply in the tutor style.
@@ -123,7 +174,6 @@ Return ONLY this JSON:
 }}
 """
 
-    # Build message history for LangChain
     messages = [("system", system)]
     if chat_history:
         for msg in chat_history:
@@ -152,10 +202,6 @@ Return ONLY this JSON:
 # =========================================================
 
 def suggest_related_topics(topic: str, level: str = "beginner") -> dict:
-    """
-    Suggests related topics the student should study next after learning a topic.
-    Provides a structured learning progression roadmap.
-    """
     system = (
         "You are Antigravity AI Tutor. Your job is to create a learning path for students. "
         "Return only pure valid JSON. Do NOT use markdown blocks."
@@ -218,10 +264,6 @@ def validate_student_answer(
     correct_solution: str,
     student_answer: str
 ) -> dict:
-    """
-    Evaluates whether the student's answer to the practice question is correct.
-    Provides constructive feedback and a score.
-    """
     system = (
         "You are Antigravity AI Tutor. Evaluate a student's answer to a practice question. "
         "Be encouraging, give honest feedback, and award a score out of 10. "
