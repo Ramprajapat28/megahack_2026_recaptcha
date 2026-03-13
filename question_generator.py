@@ -108,3 +108,157 @@ def generate_questions(topic: str, difficulty: str, job_description: str, num_qu
     except Exception as e:
         print(f"Error calling LLM: {str(e)}")
         raise e
+
+def generate_jd_questions(role: str, skills: str, experience: str, difficulty: str, num_questions: int = 5) -> dict:
+    """
+    Mode 1: Generates multiple-choice questions based on Role, Skills, and Experience.
+    """
+    system_prompt = (
+        "You are a technical recruiter designing screening questions. "
+        "Always respond with pure, valid JSON ONLY. Do NOT wrap the JSON in markdown blocks like ```json."
+    )
+    
+    user_prompt = """
+    Based on the following job description constraints, generate {num_questions} multiple-choice questions that evaluate the candidate.
+
+    Job Description constraints:
+    - Role: {role}
+    - Skills Details: {skills}
+    - Experience Level: {experience}
+    - Difficulty Level: {difficulty}
+
+    The questions should test:
+    - technical knowledge
+    - logical reasoning
+    - problem solving
+
+    Return ONLY this exact JSON structure:
+    {{
+      "metadata": {{
+        "role": "{role}",
+        "skills": "{skills}",
+        "experience": "{experience}",
+        "difficulty": "{difficulty}",
+        "total_questions": {num_questions}
+      }},
+      "questions": [
+        {{
+          "id": 1,
+          "question": "Question text here",
+          "options": {{
+            "A": "Option A text",
+            "B": "Option B text",
+            "C": "Option C text",
+            "D": "Option D text"
+          }},
+          "correct_answer": "A",
+          "explanation": "Brief explanation."
+        }}
+      ]
+    }}
+    """
+    
+    prompt_template = ChatPromptTemplate.from_messages([
+        ("system", system_prompt),
+        ("human", user_prompt)
+    ])
+    
+    chain = prompt_template | chat_model | StrOutputParser()
+    
+    try:
+        response_text = chain.invoke({
+            "role": role,
+            "skills": skills,
+            "experience": experience,
+            "difficulty": difficulty,
+            "num_questions": num_questions
+        })
+        
+        cleaned_response = response_text.strip()
+        if cleaned_response.startswith('```json'):
+            cleaned_response = cleaned_response[7:]
+        if cleaned_response.startswith('```'):
+            cleaned_response = cleaned_response[3:]
+        if cleaned_response.endswith('```'):
+            cleaned_response = cleaned_response[:-3]
+            
+        return json.loads(cleaned_response.strip())
+        
+    except json.JSONDecodeError as json_err:
+        raise ValueError(f"LLM did not return valid JSON. Error: {str(json_err)}")
+    except Exception as e:
+        raise e
+
+def generate_company_questions(company: str, role: str, difficulty: str, num_questions: int = 5) -> dict:
+    """
+    Mode 2: Generates company interview pattern questions based on Company and Role.
+    """
+    system_prompt = (
+        "You are an expert technical interviewer representing top-tier technology companies. "
+        "Always respond with pure, valid JSON ONLY. Do NOT wrap the JSON in markdown blocks like ```json."
+    )
+    
+    user_prompt = """
+    Generate {num_questions} multiple-choice questions inspired by real interview trends for the following company and role.
+
+    Constraints:
+    - Company: {company}
+    - Role: {role}
+    - Difficulty: {difficulty}
+
+    The questions should accurately reflect the known interview patterns (e.g. Amazon leadership principles + systemic design, Google algorithms, TCS NQT, etc.) for this company.
+
+    Return ONLY this exact JSON structure:
+    {{
+      "metadata": {{
+        "company": "{company}",
+        "role": "{role}",
+        "difficulty": "{difficulty}",
+        "total_questions": {num_questions}
+      }},
+      "questions": [
+        {{
+          "id": 1,
+          "question": "Question text here",
+          "options": {{
+            "A": "Option A text",
+            "B": "Option B text",
+            "C": "Option C text",
+            "D": "Option D text"
+          }},
+          "correct_answer": "A",
+          "explanation": "Brief explanation."
+        }}
+      ]
+    }}
+    """
+    
+    prompt_template = ChatPromptTemplate.from_messages([
+        ("system", system_prompt),
+        ("human", user_prompt)
+    ])
+    
+    chain = prompt_template | chat_model | StrOutputParser()
+    
+    try:
+        response_text = chain.invoke({
+            "company": company,
+            "role": role,
+            "difficulty": difficulty,
+            "num_questions": num_questions
+        })
+        
+        cleaned_response = response_text.strip()
+        if cleaned_response.startswith('```json'):
+            cleaned_response = cleaned_response[7:]
+        if cleaned_response.startswith('```'):
+            cleaned_response = cleaned_response[3:]
+        if cleaned_response.endswith('```'):
+            cleaned_response = cleaned_response[:-3]
+            
+        return json.loads(cleaned_response.strip())
+        
+    except json.JSONDecodeError as json_err:
+        raise ValueError(f"LLM did not return valid JSON. Error: {str(json_err)}")
+    except Exception as e:
+        raise e
