@@ -8,7 +8,7 @@ let isRunning = false;
 
 console.log("⏰ Exam status cron initialized");
 
-const autoUpdate = cron.schedule("* * * * *", async () => {
+const autoUpdate = cron.schedule("*/5 * * * *", async () => {
 
   if (isRunning) {
     console.log("⚠️ Previous cron still running. Skipping...");
