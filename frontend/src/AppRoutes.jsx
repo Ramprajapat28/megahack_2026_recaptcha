@@ -12,6 +12,7 @@ import Stu_UpcomingTest from "./pages/student/Stu_UpcomingTest";
 import Stu_TestInstruction from "./pages/student/Stu_TestInstruction";
 import Stu_Analytics from "./pages/student/Stu_Analytics";
 import Stu_Result from "./pages/student/Stu_Result";
+import CodingQuestionPage from "./pages/student/CodingQuestionPage";
 
 import Adm_Dashboard from "./pages/admin/Adm_Dashboard";
 import Adm_CreateTestForm from "./pages/admin/Adm_CreateTestForm";
@@ -86,6 +87,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute allowedRoles={["Student"]}>
             <Stu_Result />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/coding-test"
+        element={
+          <ProtectedRoute allowedRoles={["Student"]}>
+            <CodingQuestionPage />
           </ProtectedRoute>
         }
       />
