@@ -1,0 +1,11 @@
+node_modules
+.env
+dist
+uploads
+exports
+work.txt
+
+index.js
+logs
+logs/app.log
+logs/error.log
