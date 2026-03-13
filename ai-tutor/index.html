@@ -299,7 +299,7 @@
       font-weight: 400;
     }
 
-    .r-examples {
+    .r-example {
       margin-top: 14px;
       font-size: 14.5px;
       line-height: 1.7;
@@ -310,57 +310,13 @@
       border-left: 3px solid #0071e3;
     }
 
-    .r-divider {
-      margin: 20px 0;
-      border: none;
-      border-top: 1px solid #f0f0f5;
-    }
-
-    .r-label {
+    .r-example-label {
       font-size: 11px;
       text-transform: uppercase;
       letter-spacing: 0.9px;
       color: #adadb8;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
-
-    .r-practice {
-      font-size: 14.5px;
-      line-height: 1.7;
-      color: #1d1d1f;
-      padding: 14px 18px;
-      background: #f5f5f7;
-      border-radius: 10px;
-    }
-
-    .r-solution {
-      font-size: 14.5px;
-      line-height: 1.7;
-      color: #1c7c1c;
-      padding: 14px 18px;
-      background: #f0faf0;
-      border-radius: 10px;
-      margin-top: 8px;
-    }
-
-    .chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 7px;
-      margin-top: 8px;
-    }
-    .chip {
-      padding: 5px 14px;
-      border-radius: 20px;
-      border: 1px solid #d2d2d7;
-      font-size: 12.5px;
-      color: #3a3a3c;
-      cursor: pointer;
-      transition: all 0.15s;
-      background: transparent;
-      font-family: 'Inter', sans-serif;
-    }
-    .chip:hover { background: #f0f0f5; border-color: #adadb8; }
   </style>
 </head>
 <body>
@@ -408,23 +364,11 @@
       <strong id="rTopic"></strong>
     </div>
     <div class="r-body">
-
       <p class="r-explanation" id="rExplanation"></p>
-      <div class="r-examples" id="rExamples" style="display:none"></div>
-
-      <hr class="r-divider" id="practiceDivider" style="display:none">
-      <div id="practiceSection" style="display:none">
-        <p class="r-label">Practice</p>
-        <div class="r-practice" id="rPracticeQ"></div>
-        <div class="r-solution" id="rSolution"></div>
+      <div id="rExampleWrap" style="display:none">
+        <p class="r-example-label" style="margin-top:18px">Example</p>
+        <div class="r-example" id="rExample"></div>
       </div>
-
-      <hr class="r-divider" id="relatedDivider" style="display:none">
-      <div id="relatedSection" style="display:none">
-        <p class="r-label">Explore next</p>
-        <div class="chips" id="rRelated"></div>
-      </div>
-
     </div>
   </div>
 
@@ -589,54 +533,13 @@ function render(d) {
   document.getElementById('rTopic').textContent = d.topic || '—';
   document.getElementById('rExplanation').textContent = d.explanation || '';
 
-  // Examples — join into one readable block
-  const exEl = document.getElementById('rExamples');
-  if (d.examples?.length) {
-    exEl.style.display = 'block';
-    exEl.innerHTML = d.examples.map((ex, i) =>
-      `<div${i > 0 ? ' style="margin-top:10px"' : ''}>${ex}</div>`
-    ).join('');
+  const wrap = document.getElementById('rExampleWrap');
+  const exEl = document.getElementById('rExample');
+  if (d.example) {
+    exEl.textContent = d.example;
+    wrap.style.display = 'block';
   } else {
-    exEl.style.display = 'none';
-  }
-
-  // Practice + solution
-  const ps = document.getElementById('practiceSection');
-  const pd = document.getElementById('practiceDivider');
-  if (d.practice_question) {
-    document.getElementById('rPracticeQ').textContent = d.practice_question;
-    document.getElementById('rSolution').textContent = d.solution || '';
-    ps.style.display = 'block';
-    pd.style.display = 'block';
-  } else {
-    ps.style.display = 'none';
-    pd.style.display = 'none';
-  }
-
-  // Related topic chips
-  const rs = document.getElementById('relatedSection');
-  const rd = document.getElementById('relatedDivider');
-  const chips = document.getElementById('rRelated');
-  chips.innerHTML = '';
-  if (d.related_topics?.length) {
-    d.related_topics.forEach(t => {
-      const c = document.createElement('button');
-      c.className = 'chip';
-      c.textContent = t;
-      c.onclick = () => {
-        setMode('text');
-        queryEl.value = t;
-        clearBtn.classList.add('visible');
-        submitQuery(t, 'text');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      };
-      chips.appendChild(c);
-    });
-    rs.style.display = 'block';
-    rd.style.display = 'block';
-  } else {
-    rs.style.display = 'none';
-    rd.style.display = 'none';
+    wrap.style.display = 'none';
   }
 
   card.scrollIntoView({ behavior: 'smooth', block: 'start' });
