@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice AI Interviewer | MegaHack 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(229, 231, 235, 0.5);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+        
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+            100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        }
+        
+        .mic-active {
+            animation: pulse-ring 2s infinite;
+            background-color: #ef4444 !important; /* red */
+        }
+
+        .ai-speaking {
+            animation: pulse-ring 2s infinite;
+            background-color: #3b82f6 !important; /* blue */
+        }
+        
+        .typing-indicator span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: #9ca3af;
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: typing 1.4s infinite ease-in-out both;
+        }
+
+        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        .message-box {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        /* Format AI Response specifically */
+        .ai-response strong { color: #1e3a8a; } /* dark blue */
+        .ai-response ul { list-style-type: disc; margin-left: 20px; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen font-sans text-slate-800">
+
+    <!-- Navigation -->
+    <nav class="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold tracking-tighter">
+                        AI
+                    </div>
+                    <span class="font-bold text-xl text-slate-900 tracking-tight">Voice Interviewer</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto px-4 py-8">
+        
+        <!-- Setup Section -->
+        <div id="setup-section" class="glass-panel rounded-2xl p-8 mb-8 text-center">
+            <h1 class="text-3xl font-bold text-slate-900 mb-4">Start Your AI Interview</h1>
+            <p class="text-slate-600 mb-8 max-w-2xl mx-auto">Get realistic, voice-based interview practice. The AI will ask questions, listen to your answers, grade you, and adapt to your performance.</p>
+            
+            <div class="flex flex-col md:flex-row justify-center gap-4 mb-8">
+                <div class="text-left w-full max-w-xs">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Target Role</label>
+                    <input type="text" id="role-input" placeholder="e.g. Full Stack Developer" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" value="Backend Developer">
+                </div>
+                
+                <div class="text-left w-full max-w-xs">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Difficulty</label>
+                    <select id="difficulty-input" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none cursor-pointer transition-all">
+                        <option value="Beginner">Beginner / Fresher</option>
+                        <option value="Intermediate" selected>Intermediate</option>
+                        <option value="Advanced">Advanced / Senior</option>
+                    </select>
+                </div>
+            </div>
+
+            <button id="start-btn" onclick="startInterview()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-8 rounded-full shadow-lg shadow-blue-500/30 transition-all transform hover:-translate-y-0.5 flex items-center gap-2 mx-auto">
+                <i class="fas fa-play"></i> Start Interview
+            </button>
+        </div>
+
+        <!-- Interview Interface (Initially Hidden) -->
+        <div id="interview-section" class="hidden">
+            
+            <!-- Context Banner -->
+            <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6 flex justify-between items-center">
+                <div>
+                    <span class="text-sm text-blue-600 font-semibold uppercase tracking-wider">Current Interview</span>
+                    <h2 id="interview-title" class="text-lg font-bold text-slate-900">Backend Developer (Intermediate)</h2>
+                </div>
+                <button onclick="endInterview()" class="text-sm text-slate-500 hover:text-red-500 font-medium transition-colors">
+                    End Interview
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Virtual Interviewer Widget -->
+                <div class="lg:col-span-1">
+                    <div class="glass-panel rounded-2xl p-6 text-center h-full flex flex-col items-center justify-center">
+                        
+                        <!-- Status Avatar -->
+                        <div id="ai-avatar" class="w-24 h-24 rounded-full bg-slate-200 mx-auto flex items-center justify-center text-3xl text-white shadow-inner mb-4 transition-all duration-300">
+                            🤖
+                        </div>
+                        
+                        <h3 class="font-bold text-lg text-slate-900 mb-1">Interviewer</h3>
+                        <p id="interviewer-status" class="text-sm text-slate-500 font-medium">Connecting...</p>
+                        
+                        <div class="mt-8 border-t border-slate-100 pt-6 w-full">
+                            
+                            <!-- Mic Button -->
+                            <p class="text-xs text-slate-500 mb-3 font-medium uppercase tracking-wider">Your Microphone</p>
+                            <button id="mic-btn" onclick="toggleListening()" disabled class="w-16 h-16 rounded-full bg-slate-200 text-slate-400 mx-auto flex items-center justify-center text-xl shadow-md transition-all">
+                                <i class="fas fa-microphone"></i>
+                            </button>
+                            <p id="mic-status" class="text-xs text-slate-500 mt-3 h-4">Waiting for AI...</p>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Log / Transcript -->
+                <div class="lg:col-span-2">
+                    <div class="glass-panel rounded-2xl p-6 h-full border border-slate-200 flex flex-col">
+                        <h3 class="font-bold text-lg text-slate-800 mb-4 pb-4 border-b border-slate-100">Live Transcript</h3>
+                        
+                        <!-- Messages Container -->
+                        <div id="chat-box" class="message-box flex-1 space-y-6 pb-4">
+                            <!-- Messages will be injected here -->
+                        </div>
+
+                        <!-- Typing Indicator -->
+                        <div id="typing-indicator" class="hidden mt-4 pt-4 border-t border-slate-100">
+                            <div class="flex items-center gap-3 text-slate-500 text-sm font-medium">
+                                <div class="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs">🤖</div>
+                                AI is thinking
+                                <div class="typing-indicator">
+                                    <span></span><span></span><span></span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // --- Web Speech API Setup ---
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition = null;
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+        } else {
+            alert("Speech Recognition Native API is not supported in this browser. Please use Chrome.");
+        }
+
+        const synth = window.speechSynthesis;
+        let voices = [];
+        
+        // Wait for voices to load
+        synth.onvoiceschanged = () => {
+            voices = synth.getVoices();
+        };
+
+        // --- State ---
+        let chatHistory = [];
+        let isListening = false;
+        let role = "";
+        let difficulty = "";
+
+        // --- DOM Elements ---
+        const setupSection = document.getElementById('setup-section');
+        const interviewSection = document.getElementById('interview-section');
+        const chatBox = document.getElementById('chat-box');
+        const micBtn = document.getElementById('mic-btn');
+        const micStatus = document.getElementById('mic-status');
+        const aiAvatar = document.getElementById('ai-avatar');
+        const interviewerStatus = document.getElementById('interviewer-status');
+        const typingIndicator = document.getElementById('typing-indicator');
+
+        // --- Core Functions ---
+
+        async function startInterview() {
+            role = document.getElementById('role-input').value.trim() || 'Backend Developer';
+            difficulty = document.getElementById('difficulty-input').value;
+
+            document.getElementById('interview-title').innerText = `${role} (${difficulty})`;
+            
+            setupSection.classList.add('hidden');
+            interviewSection.classList.remove('hidden');
+            
+            setAIStatus("Thinking...", true);
+
+            try {
+                // Initialize the interview round via backend API
+                const response = await fetch('/api/interview/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ role: role, difficulty: difficulty })
+                });
+
+                if (!response.ok) throw new Error("Failed to start interview");
+
+                const data = await response.json();
+                const aiMessage = data.response;
+                
+                chatHistory.push({ role: 'ai', content: aiMessage });
+                appendMessage('Interviewer', formatAIResponse(aiMessage), 'ai');
+                
+                // Speak the AI's response aloud
+                speakText(aiMessage);
+
+            } catch (error) {
+                console.error(error);
+                setAIStatus("Error", false);
+                alert("Could not start interview. Is the backend running?");
+            }
+        }
+
+        async function processUserTurn(transcript) {
+            // Add user message to UI and history
+            appendMessage('You', transcript, 'human');
+            chatHistory.push({ role: 'human', content: transcript });
+
+            setAIStatus("Evaluating answer...", true);
+
+            try {
+                // Submit user message and history to generate next Interviewer action
+                const response = await fetch('/api/interview/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        role: role,
+                        difficulty: difficulty,
+                        chat_history: chatHistory.slice(0, -1), // Everything except latest
+                        user_message: transcript
+                    })
+                });
+
+                if (!response.ok) throw new Error("Failed to get AI response");
+
+                const data = await response.json();
+                const aiMessage = data.response;
+                
+                chatHistory.push({ role: 'ai', content: aiMessage });
+                appendMessage('Interviewer', formatAIResponse(aiMessage), 'ai');
+                
+                // Speak response aloud
+                speakText(aiMessage);
+
+            } catch (error) {
+                console.error(error);
+                setAIStatus("Error generating response", false);
+            }
+        }
+
+        // --- Speech Operations ---
+
+        function toggleListening() {
+            if (!recognition) return;
+
+            if (isListening) {
+                recognition.stop();
+            } else {
+                try {
+                    recognition.start();
+                } catch(e) {
+                     console.log("Already started", e);
+                }
+            }
+        }
+
+        if (recognition) {
+            recognition.onstart = () => {
+                isListening = true;
+                micBtn.classList.remove('bg-slate-200', 'text-slate-400', 'bg-blue-600', 'hover:bg-blue-700');
+                micBtn.classList.add('mic-active', 'text-white');
+                micStatus.innerText = "Listening... Speak now";
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                processUserTurn(transcript);
+            };
+
+            recognition.onerror = (event) => {
+                console.error('Speech recognition error:', event.error);
+                micStatus.innerText = "Error: " + event.error;
+            };
+
+            recognition.onend = () => {
+                isListening = false;
+                micBtn.classList.remove('mic-active');
+                
+                // Only allow clicking mic if AI isn't currently speaking
+                if(!synth.speaking) {
+                    micBtn.classList.add('bg-blue-600', 'hover:bg-blue-700', 'text-white');
+                    micBtn.disabled = false;
+                    micStatus.innerText = "Click to Answer";
+                }
+            };
+        }
+
+        function speakText(text) {
+            if (!synth) return;
+
+            // Strip markdown/asterisks for smoother reading aloud
+            const cleanText = text.replace(/\*/g, '').replace(/Evaluation:/g, '').replace(/Next Question:/g, '');
+            
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            
+            // Try to use a professional sounding voice if available
+            const preferredVoice = voices.find(v => v.name.includes('Google US English') || v.name.includes('Samantha') || v.lang === 'en-US');
+            if (preferredVoice) utterance.voice = preferredVoice;
+
+            utterance.rate = 1.05; // Slightly faster, natural pacing
+            utterance.pitch = 1.0;
+
+            utterance.onstart = () => {
+                setAIStatus("Speaking...", false);
+                aiAvatar.classList.add('ai-speaking');
+                
+                // Disable mic while AI speaks
+                micBtn.disabled = true;
+                micBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'text-white');
+                micBtn.classList.add('bg-slate-200', 'text-slate-400');
+                micStatus.innerText = "AI is speaking...";
+            };
+
+            utterance.onend = () => {
+                setAIStatus("Waiting for your answer", false);
+                aiAvatar.classList.remove('ai-speaking');
+                
+                // Enable mic after AI finishes
+                micBtn.disabled = false;
+                micBtn.classList.remove('bg-slate-200', 'text-slate-400');
+                micBtn.classList.add('bg-blue-600', 'hover:bg-blue-700', 'text-white');
+                micStatus.innerText = "Click to Answer";
+            };
+
+            synth.speak(utterance);
+        }
+
+        // --- UI Helpers ---
+
+        function appendMessage(sender, htmlContent, type) {
+            const isAI = type === 'ai';
+            
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `flex gap-4 p-4 rounded-xl ${isAI ? 'bg-slate-50 border border-slate-100' : 'bg-blue-50 border border-blue-100 ml-8'}`;
+            
+            const icon = isAI 
+                ? `<div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-sm shadow-sm flex-shrink-0">🤖</div>`
+                : `<div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-sm shadow-sm flex-shrink-0">👤</div>`;
+
+            msgDiv.innerHTML = `
+                ${isAI ? icon : ''}
+                <div class="flex-1 w-full">
+                    <p class="text-xs font-bold text-slate-500 mb-1 tracking-wider uppercase">${sender}</p>
+                    <div class="text-sm text-slate-800 leading-relaxed space-y-2 ai-response">
+                        ${htmlContent}
+                    </div>
+                </div>
+                ${!isAI ? icon : ''}
+            `;
+            
+            chatBox.appendChild(msgDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function formatAIResponse(text) {
+            // Basic markdown regex conversion for visual appeal
+            let html = text
+                .replace(/\n\n/g, '</p><p>')
+                .replace(/\n/g, '<br>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            
+            return `<p>${html}</p>`;
+        }
+
+        function setAIStatus(txt, showTyping) {
+            interviewerStatus.innerText = txt;
+            if (showTyping) {
+                typingIndicator.classList.remove('hidden');
+            } else {
+                typingIndicator.classList.add('hidden');
+            }
+        }
+
+        function endInterview() {
+            if(synth) synth.cancel();
+            if(recognition) recognition.stop();
+            location.reload();
+        }
+
+    </script>
+</body>
+</html>
