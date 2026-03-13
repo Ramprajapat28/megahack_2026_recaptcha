@@ -103,22 +103,15 @@ const getExamsByStatusforadmin = async (status) => {
   console.log(status, "dsnsddndd")
   try {
 
-
-
-    let exams = dbWrite("exams")
-      .select("*")
-      .where("status", status)
-      
-
-    // filter by branch
-   
-
-   
-
-    // future exams only
-    // query = query.andWhere("start_time", ">", dbWrite.fn.now());
-
-    // const exams = await query.orderBy("start_time", "asc");
+    let exams = await dbWrite("exams as e")
+      .leftJoin("questions as q", "e.exam_id", "q.exam_id")
+      .select(
+        "e.*",
+        dbWrite.raw("COUNT(q.question_id) as questions") // Admin frontend seems to expect "questions"
+      )
+      .where("e.status", status)
+      .groupBy("e.exam_id")
+      .orderBy("e.start_time", "asc");
 
     return exams;
 
