@@ -153,8 +153,8 @@ const Login = () => {
 
   return (
     <div className="block">
-      <div className="xs:flex hidden sm:flex-row h-screen relative">
-        <img
+      <div className="flex sm:flex-row h-screen relative">
+        {/* <img
           src={ace}
           alt="ACE Logo"
           className="absolute top-4 left-4 w-12 h-12 md:w-16 md:h-16 z-10"
@@ -163,7 +163,7 @@ const Login = () => {
           src={csi}
           alt="CSI logo"
           className="absolute top-4 left-24 w-12 h-12 md:w-16 md:h-16 z-10"
-        />
+        /> */}
 
         {/* Left Section */}
         <div className="w-full md:w-1/3 relative flex flex-col items-center p-6 bg-gradient-to-br from-[#0E2A47] to-[#04448D]">
@@ -227,8 +227,8 @@ const Login = () => {
         </div>
       </div>
 
-      {/* This part never shows now due to screen.width check */}
-      <div className="xs:hidden flex justify-center items-center h-screen text-xl font-bold text-gray-800">
+      {/* Fallback — only shows on screens smaller than sm (640px) */}
+      <div className="sm:hidden flex justify-center items-center h-screen text-xl font-bold text-gray-800">
         Login through Desktop
       </div>
     </div>
