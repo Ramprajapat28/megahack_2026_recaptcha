@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node app.js",
-    "dev":"nodemon app.js",
+    "dev": "nodemon app.js",
     "format": "prettier --write .",
     "seed_database": "knex seed:run",
     "create_seed": "knex seed:make --migrations-directory src/models/seeds",
@@ -55,6 +55,7 @@
     "redis": "^4.7.1",
     "socket.io": "^4.8.1",
     "uuid": "^11.0.3",
+    "vm2": "^3.10.5",
     "winston": "^3.17.0"
   },
   "devDependencies": {

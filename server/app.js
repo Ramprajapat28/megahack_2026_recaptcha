@@ -26,6 +26,7 @@ const tpoRoutes = require('./routes/tpoAnalysisRoutes');
 const rankRoutes = require('./routes/rankRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
 const pdfRoutes = require('./routes/pdfRoutes');
+const dsaRoutes = require('./routes/dsaRoutes');
 
 // Initialize the app
 const app = express();
@@ -84,6 +85,7 @@ app.use('/api/tpo-analysis', jwtAuthMiddleware, tpoRoutes);
 app.use('/api/rank', jwtAuthMiddleware, rankRoutes);
 app.use('/api', jwtAuthMiddleware, uploadRoutes);
 app.use('/generate-pdf', jwtAuthMiddleware, pdfRoutes);
+app.use('/api/dsa', jwtAuthMiddleware, dsaRoutes);
 
 const start_exam = io.of('/exams/start-exam');
 
