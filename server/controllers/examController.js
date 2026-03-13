@@ -14,8 +14,8 @@ const createExam = async (req, res) => {
 
   // Determine 'exam_for' based on role
   let exam_for;
-  if (role === 'TPO' || role === 'Department') {
-    exam_for = 'Student';
+  if (role === 'admin') {
+    exam_for = 'user';
     if (
       !name ||
       !duration ||
@@ -37,13 +37,6 @@ const createExam = async (req, res) => {
       // console.log('year and branches', formattedTargetBranches, formattedTargetYears);
     } else {
       return res.json({ message: 'input field error ' });
-    }
-  } else if (role === 'President') {
-    exam_for = 'Teacher';
-    formattedTargetBranches = null;
-    formattedTargetYears = null;
-    if (!name || !duration || !created_by) {
-      return res.status(400).json({ error: 'All fields are required' });
     }
   } else {
     return res
@@ -319,7 +312,24 @@ const getPaginatedScheduledExams = async (req, res) => {
 
   try {
     if (!role) return res.status(400).json({ error: 'Role is required' });
-    const yearFilter = role === 'TPO' ? 'BE' : null;
+    
+    if (role === 'admin') {
+      
+      exams = await examModel.getExamsByStatusforadmin(status);
+      console.log(exams,"exams")
+      res.status(200).json({
+        message: 'Exams retrieved successfully',
+        exams: exams || [],
+       
+        ...(page && limit
+          ? { page: parseInt(page), limit: parseInt(limit) }
+          : {}),
+      });
+      return true;
+        
+        
+    }
+    const yearFilter = role === 'admin' ? 'BE' : null;
     if (!page && !limit) {
       Count = await examModel.ExamCount(status, role);
       exams = await examModel.getExamsByStatus(status, role, branch, yearFilter);
@@ -366,19 +376,33 @@ const getPaginatedDraftedExams = async (req, res) => {
 
   try {
     if (!role) return res.status(400).json({ error: 'Role is required' });
-    const yearFilter = role === 'TPO' ? 'BE' : null;
+    const yearFilter = role === 'admin' ? 'BE' : null;
 
     // Determine branch filter
     let branchFilter = null;
 
-    if (role === 'Department') {
-      if (!branch) return res.status(400).json({ error: 'Branch is required for Department role' });
-      branchFilter = branch;
+    if (role === 'admin') {
+       Count = await examModel.ExamCount(status, role, branchFilter);
+      exams = await examModel.getExamsByStatusforadmin(status);
+      console.log(exams,"exams")
+      res.status(200).json({
+        message: 'Exams retrieved successfully',
+        exams: exams || [],
+        Count: Count || 0,
+        ...(page && limit
+          ? { page: parseInt(page), limit: parseInt(limit) }
+          : {}),
+      });
+      return true;
+        
+        
     }
 
     if (!page && !limit) {
       Count = await examModel.ExamCount(status, role, branchFilter);
       exams = await examModel.getExamsByStatus(status, role, branchFilter, yearFilter);
+      
+      console.log(exams,"exams");
     } else {
       Count = await examModel.ExamCount(status, role, branchFilter);
       exams = await examModel.getPaginatedExams(
@@ -388,6 +412,7 @@ const getPaginatedDraftedExams = async (req, res) => {
         role,
         branchFilter
       );
+      console.log(exams,"exams");
     }
 
     await logActivity({
@@ -422,8 +447,24 @@ const getPaginatedLiveExams = async (req, res) => {
   try {
     if (!role) return res.status(400).json({ error: 'Role is required' });
 
-    const branchFilter = role !== 'TPO' ? branch : null;
-    const yearFilter = role === 'TPO' ? 'BE' : null;
+    if (role === 'admin') {
+   
+      exams = await examModel.getExamsByStatusforadmin(status);
+      console.log(exams,"exams")
+      res.status(200).json({
+        message: 'Exams retrieved successfully',
+        exams: exams || [],
+        
+        ...(page && limit
+          ? { page: parseInt(page), limit: parseInt(limit) }
+          : {}),
+      });
+      return true;
+        
+        
+    }
+    const branchFilter = role !== 'admin' ? branch : null;
+    const yearFilter = role === 'admin' ? 'BE' : null;
     if (!page && !limit) {
       Count = await examModel.ExamCount(status, role);
       exams = await examModel.getExamsByStatus(status, role, branchFilter, yearFilter);
@@ -473,13 +514,29 @@ const getPaginatedPastExams = async (req, res) => {
   let status = 'past', Count, exams;
   const { page, limit, role, branch } = req.query;
 
-  const yearFilter = user_role === 'TPO' ? 'BE' : null;
+  const yearFilter = user_role === 'admin' ? 'BE' : null;
 
   const cacheKey = `pastExams:${role}:${branch || 'all'}:${yearFilter || 'all'}:${page || 'all'}:${limit || 'all'}`;
 
   try {
     if (!role) return res.status(400).json({ error: 'Role is required' });
 
+    if (role === 'admin') {
+      
+      exams = await examModel.getExamsByStatusforadmin(status);
+      console.log(exams,"exams")
+      res.status(200).json({
+        message: 'Exams retrieved successfully',
+        exams: exams || [],
+       
+        ...(page && limit
+          ? { page: parseInt(page), limit: parseInt(limit) }
+          : {}),
+      });
+      return true;
+        
+        
+    }
     // 1. Check Redis cache
     const cached = await redis.get(cacheKey);
     if (cached) {

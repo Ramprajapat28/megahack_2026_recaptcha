@@ -299,7 +299,7 @@ const getAllPaginatedUsers = async (req, res) => {
   const { page, limit, role, department } = req.query;
 
   // Add year filter for TPO
-  const isTPO = user_role === 'TPO';
+  const isTPO = user_role === 'admin';
   const yearFilter = isTPO ? 'BE' : null;
 
   const cacheKey = `users:${role || 'all'}:${department || 'all'}:${page || 'all'}:${limit || 'all'}:${yearFilter || 'none'}`;

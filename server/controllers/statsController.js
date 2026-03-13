@@ -1,6 +1,6 @@
 const { getLastExam } = require('../models/examModel');
 const { logActivity } = require('../utils/logActivity');
-const pool = require('../config/db');
+const { dbWrite } = require('../config/db');
 
 const getLastExamStats = async (req, res) => {
   const user_id = req.user.id;
@@ -39,14 +39,14 @@ const getLastExamStats = async (req, res) => {
 
 const getStudentCountForExam = async (exam_id, exam_for) => {
   let query;
-  if (exam_for === 'Student') {
+  if (exam_for === 'user') {
     query = 'SELECT COUNT(*) FROM responses WHERE exam_id = $1';
   }
   else if (exam_for === 'Teacher') {
     query = 'SELECT COUNT(*) FROM teacher_responses WHERE exam_id = $1';
   }
   const values = [exam_id];
-  const result = await dbWrite.raw(query, values);
+  const result = await dbWrite.raw(query, [exam_id]);
   return parseInt(result.rows[0].count, 10);
 };
 
@@ -57,40 +57,13 @@ const getAllTestsStats = async (req, res) => {
   const user_branch = req.user.branch;
 
   try {
-    let liveTestsQuery = 'SELECT COUNT(*) FROM exams WHERE status = $1 AND exam_for = $2';
-    let scheduledTestsQuery = 'SELECT COUNT(*) FROM exams WHERE status = $1 AND exam_for = $2';
-    let pastTestsQuery = 'SELECT COUNT(*) FROM exams WHERE status = $1 AND exam_for = $2';
+    const liveTestsResult = await dbWrite('exams').count('* as count').where({ status: 'live', exam_for });
+    const scheduledTestsResult = await dbWrite('exams').count('* as count').where({ status: 'scheduled', exam_for });
+    const pastTestsResult = await dbWrite('exams').count('* as count').where({ status: 'past', exam_for });
 
-    const liveValues = ['live', exam_for];
-    const scheduledValues = ['scheduled', exam_for];
-    const pastValues = ['past', exam_for];
-
-    if (user_role === 'TPO') {
-      liveTestsQuery += ' AND target_years @> $3::year_enum[]';
-      scheduledTestsQuery += ' AND target_years @> $3::year_enum[]';
-      pastTestsQuery += ' AND target_years @> $3::year_enum[]';
-
-      liveValues.push(['BE']); // ✅ Note: pass as array
-      scheduledValues.push(['BE']);
-      pastValues.push(['BE']);
-    } else if (user_role === 'department') {
-      liveTestsQuery += ' AND target_branches @> $3::branch_enum[]';
-      scheduledTestsQuery += ' AND target_branches @> $3::branch_enum[]';
-      pastTestsQuery += ' AND target_branches @> $3::branch_enum[]';
-
-      liveValues.push([user_branch]); // ✅ Pass as array
-      scheduledValues.push([user_branch]);
-      pastValues.push([user_branch]);
-    }
-
-
-    const liveTestsResult = await dbWrite.raw(liveTestsQuery, liveValues);
-    const scheduledTestsResult = await dbWrite.raw(scheduledTestsQuery, scheduledValues);
-    const pastTestsResult = await dbWrite.raw(pastTestsQuery, pastValues);
-
-    const liveTestsCount = parseInt(liveTestsResult.rows[0].count, 10);
-    const scheduledTestsCount = parseInt(scheduledTestsResult.rows[0].count, 10);
-    const pastTestsCount = parseInt(pastTestsResult.rows[0].count, 10);
+    const liveTestsCount = parseInt(liveTestsResult[0].count, 10);
+    const scheduledTestsCount = parseInt(scheduledTestsResult[0].count, 10);
+    const pastTestsCount = parseInt(pastTestsResult[0].count, 10);
 
     await logActivity({
       user_id,
@@ -117,22 +90,8 @@ const getAllStudentsStats = async (req, res) => {
   const exam_for = req.query.exam_for;
 
   try {
-    let totalStudentsQuery = 'SELECT COUNT(*) FROM users WHERE role = $1 AND status = $2';
-    const values = [exam_for, 'ACTIVE'];
-
-    // ✅ Correct filtering logic
-    if (user_role === 'TPO') {
-      // Admin sees only BE students from all branches
-      totalStudentsQuery += ' AND year = $3';
-      values.push('BE');
-    } else {
-      // TPO/Dept sees all students from their branch (all years)
-      totalStudentsQuery += ' AND department = $3';
-      values.push(user_branch);
-    }
-
-    const totalStudentsResult = await dbWrite.raw(totalStudentsQuery, values);
-    const totalStudentsCount = parseInt(totalStudentsResult.rows[0].count, 10);
+    const totalStudentsResult = await dbWrite('users').count('* as count').where({ role: exam_for, status: 'ACTIVE' });
+    const totalStudentsCount = parseInt(totalStudentsResult[0].count, 10);
 
     await logActivity({
       user_id,
@@ -157,10 +116,8 @@ const getAllStudentsStatsForDepartment = async (req, res) => {
 
 
   try {
-    const totalStudentsQuery = 'SELECT COUNT(*) FROM users WHERE department = $1 AND status = $2 AND role = $3';
-    const totalStudentsResult = await dbWrite.raw(totalStudentsQuery, [department, 'ACTIVE', role]);
-
-    const totalStudentsCount = parseInt(totalStudentsResult.rows[0].count, 10);
+    const totalStudentsResult = await dbWrite('users').count('* as count').where({ department, status: 'ACTIVE', role });
+    const totalStudentsCount = parseInt(totalStudentsResult[0].count, 10);
 
     await logActivity({
       user_id,
