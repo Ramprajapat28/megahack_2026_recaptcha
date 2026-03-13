@@ -1,9 +1,10 @@
 // Role-based authorization middleware
 const authorizeRoles = (req, res, next) => {
-  if (req.user.role !== 'admin' && req.user.role !== 'super_admin') {
+  console.log("Checking role for user:", req.user);
+  if (req.user.role !== 'admin') {
     return res
       .status(403)
-      .json({ message: 'Access denied. Insufficient permissions.' });
+      .json({ message: 'Access denied. Insufficient permissions.', userRole: req.user.role });
   }
   next();
 };

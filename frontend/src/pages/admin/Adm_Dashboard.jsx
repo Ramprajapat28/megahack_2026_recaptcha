@@ -86,21 +86,26 @@ const Adm_Dashboard = () => {
       try {
         const API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
         const [studentsRes, testsRes, lastTestRes] = await Promise.all([
-          axios.get(`${API_BASE_URL}/api/stats/all-students?exam_for=Student`, {
+          axios.get(`${API_BASE_URL}/api/stats/all-students?exam_for=user`, {
             withCredentials: true,
           }),
-          axios.get(`${API_BASE_URL}/api/stats/all-tests?exam_for=Student`, {
+          axios.get(`${API_BASE_URL}/api/stats/all-tests?exam_for=user`, {
             withCredentials: true,
           }),
           // axios.get(`${API_BASE_URL}/api/stats/last-test?exam_for=Student`, {
           //   withCredentials: true,
           // }),
         ]);
-
+ console.log("studentsRes", studentsRes);
+ console.log("testsRes", testsRes);
         const studentsCount = studentsRes.data.totalStudentsCount;
         const liveTestsCount = testsRes.data.liveTestsCount;
         const scheduledTestsCount = testsRes.data.scheduledTestsCount;
         const pastTestsCount = testsRes.data.pastTestsCount;
+        console.log("liveTestsCount", liveTestsCount);
+        console.log("scheduledTestsCount", scheduledTestsCount);
+        console.log("pastTestsCount", pastTestsCount);
+        console.log("studentsCount", studentsCount);
 
 
         setTileData([
@@ -120,11 +125,16 @@ const Adm_Dashboard = () => {
       try {
         const API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
         await Promise.all([
-          fetchTestsData(`${API_BASE_URL}/api/exams/drafts?role=TPO`, "drafted"),
-          fetchTestsData(`${API_BASE_URL}/api/exams/scheduled?role=TPO`, "scheduled"),
-          fetchTestsData(`${API_BASE_URL}/api/exams/past?role=TPO`, "past"),
-          fetchTestsData(`${API_BASE_URL}/api/exams/live?role=TPO`, "live"),
+          fetchTestsData(`${API_BASE_URL}/api/exams/drafts?role=admin`, "drafted"),
+          fetchTestsData(`${API_BASE_URL}/api/exams/scheduled?role=admin`, "scheduled"),
+          fetchTestsData(`${API_BASE_URL}/api/exams/past?role=admin`, "past"),
+          fetchTestsData(`${API_BASE_URL}/api/exams/live?role=admin`, "live"),
+         
         ]);
+         console.log("drafted", testsData.drafted);
+         console.log("scheduled", testsData.scheduled);
+         console.log("past", testsData.past);
+         console.log("live", testsData.live);
       } catch (err) {
         console.error("Error fetching test data:", err);
         setError("Failed to load tests. Please try again.");

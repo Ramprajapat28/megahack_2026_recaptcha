@@ -46,14 +46,8 @@ const NavbarDetails = () => {
       <h1 className="font-semibold text-xl text-gray-700">Name: {user.name}</h1>
       <div className="text-sm text-gray-500 mt-3 space-y-1">
         <p>Email: {user.email}</p>
-        {user.role === "TPO" && <p>Mobile: {user.phone}</p>}
-        {user.role === "Department" && <p>Branch: {user.department}</p>}
-        {user.role === "Teacher" && (
-          <div>
-            <p>Mobile: {user.phone}</p>
-          </div>
-        )}
-        {user.role === "Student" && (
+        {user.role === "admin" && <p>Mobile: {user.phone}</p>}
+        {user.role === "user" && (
           <>
             <p>Mobile: {user.phone}</p>
             <p>Branch: {user.department}</p>
