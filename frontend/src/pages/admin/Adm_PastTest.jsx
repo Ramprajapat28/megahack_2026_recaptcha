@@ -41,7 +41,7 @@ const Adm_PastTest = () => {
       try {
         setLoading(true);
         let API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
-        const response = await axios.get(`${API_BASE_URL}/api/exams/past?role=TPO`, {
+        const response = await axios.get(`${API_BASE_URL}/api/exams/past?role=admin`, {
           withCredentials: true, // Make sure the cookie is sent with the request
         });
         const formattedTests = response.data.exams.map((exam) => ({

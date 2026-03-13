@@ -95,8 +95,8 @@ const deleteUser = async (id) => {
 };
 
 // Pagination
-const getAllPaginatedUsers = async (page, limit) => {
-  const offset = (page - 1) * limit;
+const getAllPaginatedUsers = async ({role}) => {
+  
 
   return await dbWrite("users")
     .select(
@@ -110,8 +110,7 @@ const getAllPaginatedUsers = async (page, limit) => {
       "phone"
     )
     .orderBy("user_id", "asc")
-    .limit(limit)
-    .offset(offset);
+     .where({ role })
 };
 
 const getAllPaginatedRoleUsers = async (page, limit, role) => {
@@ -174,8 +173,8 @@ const getUserCount = async () => {
   const [user] = await dbWrite("users").where({ role: "user" }).count();
   
   return {
-    admin: Number(tpo.count),
-    user: Number(students.count)
+    admin: Number(admin.count),
+    user: Number(user.count)
   };
 };
 

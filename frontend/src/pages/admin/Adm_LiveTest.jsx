@@ -50,7 +50,7 @@ const Adm_LiveTest = () => {
         setError(null); // Clear any existing errors
         let API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
         const response = await axios.get(
-          `${API_BASE_URL}/api/exams/live?role=TPO`,
+          `${API_BASE_URL}/api/exams/live?role=admin`,
           {
             withCredentials: true,
           },

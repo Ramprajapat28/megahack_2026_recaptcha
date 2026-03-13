@@ -44,7 +44,7 @@ const Adm_DraftTest = () => {
         setLoading(true);
         setError(null);
         let API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
-        const response = await axios.get(`${API_BASE_URL}/api/exams/drafts?role=TPO`, {
+        const response = await axios.get(`${API_BASE_URL}/api/exams/drafts?role=admin`, {
           withCredentials: true,
         });
 
