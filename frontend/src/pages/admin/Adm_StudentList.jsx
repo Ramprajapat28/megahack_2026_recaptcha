@@ -148,7 +148,7 @@ const Adm_StudentList = () => {
 
 
       let API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
-      const response = await axios.get(`${API_BASE_URL}/api/users/?role=user`, {
+      const response = await axios.get(`${API_BASE_URL}/api/users/?role=admin`, {
         withCredentials: true,
       });
       const studentData = response.data.users;
