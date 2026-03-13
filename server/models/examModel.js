@@ -67,6 +67,49 @@ const getExamsByStatus = async (status, role, branch, yearFilter) => {
   }
 };
 
+
+const getPaginatedExams = async (page, limit, status, role, branch, yearFilter) => {
+  try {
+
+    const offset = (page - 1) * limit;
+
+    let query = dbWrite("exams")
+      .select(
+        "exam_id",
+        "exam_name",
+        "duration",
+        "start_time",
+        "end_time",
+        "status"
+      )
+      .where("status", status)
+      .andWhere("exam_for", role);
+
+    // Branch filter
+    if (branch) {
+      query = query.whereRaw("? = ANY(target_branches)", [branch]);
+    }
+
+    // Year filter
+    if (yearFilter) {
+      query = query.whereRaw("? = ANY(target_years)", [yearFilter]);
+    }
+
+    // Future exams only
+    query = query.andWhere("start_time", ">", dbWrite.fn.now());
+
+    const exams = await query
+      .orderBy("start_time", "asc")
+      .limit(limit)
+      .offset(offset);
+
+    return exams;
+
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+};
 /*
 GET ALL EXAMS
 */
@@ -279,5 +322,6 @@ module.exports = {
   getExamStatusById,
   getAllScheduledExams,
   getExamsByTeacherId,
-  getExamsByStatus
+  getExamsByStatus,
+  getPaginatedExams
 };
