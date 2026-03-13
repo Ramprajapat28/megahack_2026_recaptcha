@@ -12,7 +12,7 @@ const Stu_PastCard = ({ test }) => {
     const API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
     try {
       // Navigate to the results page with exam_id in state
-      navigate(`/student/results`, { state: { exam_id: test.exam_id } });
+      navigate(`/user/results`, { state: { exam_id: test.exam_id } });
     } catch (error) {
       console.error("Error during Put request:", error);
     }

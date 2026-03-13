@@ -63,7 +63,7 @@ const Adm_Dashboard = () => {
           end_time: exam.end_time,
           Start_time: exam.start_time,
           title: exam.exam_name || "Untitled Exam",
-          questions: exam.question_count || "N/A",
+          questions: exam.questions || "N/A",
           duration: exam.duration ? `${exam.duration} min` : "N/A",
           date: formatToReadableDate(exam.created_at),
           target_years: exam.target_years || "N/A",

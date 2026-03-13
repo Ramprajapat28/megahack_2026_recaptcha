@@ -444,6 +444,13 @@ const Adm_InputQuestions = () => {
               Create Aptitude Test
             </div>
             <div className="flex ">
+              <a
+                href="/sample_questions.xlsx"
+                download
+                className="mr-4 bg-green-200 text-green-900 px-4 py-2 rounded hover:bg-green-300 border border-green-700 opacity-90 hover:opacity-100 flex items-center"
+              >
+                Sample Excel
+              </a>
               <button
                 className="mr-4 bg-blue-200 text-blue-900 px-4 py-2 rounded hover:bg-blue-300 border border-blue-700 opacity-90 hover:opacity-100"
                 onClick={() => setModalOpen(true)}

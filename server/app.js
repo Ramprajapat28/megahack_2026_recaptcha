@@ -8,8 +8,8 @@ const morgan = require('morgan');
 const { jwtAuthMiddleware } = require('./middlewares/jwtAuthMiddleware');
 const cookieParser = require('cookie-parser');
 const { initSocketHandlers } = require('./utils/socket');
-// require('./utils/autoUpdateExamStatus'); // For auto-updating past exams status
-// require('./utils/autoliveExamStatus'); // For auto-updating live status
+require('./utils/autoUpdateExamStatus'); // For auto-updating past exams status
+require('./utils/autoliveExamStatus'); // For auto-updating live status
 
 // Import Routes
 const userRoutes = require('./routes/userRoutes');

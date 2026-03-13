@@ -5,9 +5,9 @@ import axios from "axios";
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   // Temporarily bypass protected route logic to allow all screens to be visited
-  return children;
+  // return children;
 
-  /*
+
   const user = useSelector((state) => state.user.user); // Get the user from Redux
   const [isVerified, setIsVerified] = useState(null);
 
@@ -34,7 +34,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   }, [user]);
 
   if (isVerified === null) {
-    return <div>Loading...</div>; // Show a loading state while verifying
+    return <div>Loading...</div>
   }
 
   if (!user) {
@@ -54,7 +54,6 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 
   // If the user is authenticated and has the required role, render the children
   return children;
-  */
 };
 
 export default ProtectedRoute;
