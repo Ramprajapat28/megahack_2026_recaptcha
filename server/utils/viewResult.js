@@ -1,36 +1,30 @@
-const { query } = require("../config/db");
-require("dotenv").config();
-const { paginate } = require('../utils/pagination');
+const { dbWrite } = require("../config/db");
+
 
 const viewResult = async (exam_id, page = 1, limit = 10) => {
   try {
-    // Base SQL query
-    let queryText = `
-      SELECT 
-          u.name AS student_name,
-          u.email AS student_email,
-          r.total_score,
-          r.max_score,
-          r.completed_at,
-          r.result_id,
-          r.exam_id,
-          e.duration,
-          e.exam_name
-      FROM 
-          results r
-      JOIN 
-          users u ON r.student_id = u.user_id
-      JOIN 
-          exams e ON r.exam_id = e.exam_id
-      WHERE 
-          r.exam_id = $1
-    `;
+    // Calculate offset for pagination
+    const offset = (page - 1) * limit;
 
-    // Apply pagination
-    queryText = paginate(queryText, page, limit);
-
-    // Execute query
-    const result = await query(queryText, [exam_id]);
+    // Fetch results using Knex
+    const results = await dbWrite("results as r")
+      .join("users as u", "r.student_id", "u.user_id")
+      .join("exams as e", "r.exam_id", "e.exam_id")
+      .select(
+        "u.name as student_name",
+        "u.email as student_email",
+        "r.total_score",
+        "r.max_score",
+        "r.completed_at",
+        "r.result_id",
+        "r.exam_id",
+        "e.duration",
+        "e.exam_name"
+      )
+      .where("r.exam_id", exam_id)
+      .orderBy("r.result_id", "asc")
+      .limit(limit)
+      .offset(offset);
 
     // Helper function to format date to readable format
     const formatToReadableDate = (isoString) => {
@@ -39,28 +33,28 @@ const viewResult = async (exam_id, page = 1, limit = 10) => {
       return date.toLocaleDateString("en-IN", options);
     };
 
-    // Calculate status for each result
-    const resultsWithStatus = result.rows.map((row) => {
+    // Add percentage and pass/fail status
+    const resultsWithStatus = results.map((row) => {
       const percentage = ((row.total_score / row.max_score) * 100); // Up to 3 decimal places
       const status = percentage >= 35 ? "Passed" : "Failed"; // Pass/Fail based on 35%
       return {
-       
         student_name: row.student_name,
         student_email: row.student_email,
-        total_score : row.total_score,
-        max_score : row.max_score,
-        duration : row.duration,
-        exam_name : row.exam_name,
-       Date: formatToReadableDate(row.completed_at), // Format date
-        percentage: Number(percentage), // Include calculated percentage
-        status :status, // Pass or Fail
+        total_score: row.total_score,
+        max_score: row.max_score,
+        duration: row.duration,
+        exam_name: row.exam_name,
+        Date: formatToReadableDate(row.completed_at),
+        percentage: Number(percentage.toFixed(2)),
+        status,
       };
     });
 
     return resultsWithStatus;
+
   } catch (error) {
-    console.error("Error executing query:", error);
-    throw error; // Rethrow error for higher-level handling
+    console.error("❌ Error fetching exam results:", error);
+    throw error;
   }
 };
 
