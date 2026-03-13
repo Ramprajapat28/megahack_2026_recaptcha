@@ -13,6 +13,7 @@ import {
 } from "../../../redux/questionSlice";
 import { clearExamId } from "../../../redux/ExamSlice";
 import { useLocation, useNavigate } from "react-router-dom";
+import VirtualCalculator from "./VirtualCalculator";
 
 const Question = ({ socketRef, remainingTime }) => {
 
@@ -38,6 +39,7 @@ const Question = ({ socketRef, remainingTime }) => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [pendingResponse, setPendingResponse] = useState(null);
   const [isSaving, setIsSaving] = useState(false); // Prevent multiple save requests
+  const [isCalcOpen, setIsCalcOpen] = useState(false);
 
   const currentQuestion = questions[currentQuestionIndex] || null;
   const questionId = currentQuestion?.question_id;
@@ -377,8 +379,22 @@ const Question = ({ socketRef, remainingTime }) => {
           ))}
         </div>
 
-        {/* Timer Display */}
-        <div className="flex justify-end mb-4">
+        {/* Timer Display & Calculator Button */}
+        <div className="flex justify-between items-center mb-4">
+          <button
+            onClick={() => setIsCalcOpen(!isCalcOpen)}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-md border text-sm font-semibold transition-colors
+              ${isCalcOpen 
+                ? 'bg-blue-100 border-blue-300 text-blue-700' 
+                : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+              }
+            `}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
+            Calculator
+          </button>
           <span className="font-sans text-center text-sm flex items-center border-2 p-1 border-blue-500 rounded-md">
             {formatTimeFromSeconds(remainingTime)}
           </span>
@@ -449,6 +465,11 @@ const Question = ({ socketRef, remainingTime }) => {
               {isSaving ? 'Saving...' : 'Save & Next'}
             </button>
           )}
+        </div>
+
+        {/* Global Virtual Calculator within Question container */}
+        <div className={isCalcOpen ? 'block' : 'hidden'}>
+          <VirtualCalculator onClose={() => setIsCalcOpen(false)} />
         </div>
       </div>
     </div>

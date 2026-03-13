@@ -1,5 +1,8 @@
 const { parentPort, workerData } = require('worker_threads');
-const { query } = require('../config/db');
+require('dotenv').config();
+const knex = require('knex');
+const knexConfig = require('../knexfile');
+const db = knex(knexConfig.api_write);
 const { generateRandomPassword } = require('../utils/randomPassword');
 const { hashPassword } = require('../utils/hashUtil');
 const { sendBulkEmailToUsers } = require('../utils/emailSender');
@@ -9,7 +12,7 @@ if (!workerData || !workerData.jsonData || !workerData.fileExtension || !workerD
     return;
 }
 
-if (!Array.isArray(workerData.jsonData) || workerData.jsonData.length === 0) {
+if      (   !   Array.isArray(workerData.jsonData) || workerData.jsonData.length === 0) {
     parentPort.postMessage({ status: 'error', message: 'Invalid or empty data provided' });
     return;
 }
@@ -39,7 +42,7 @@ async function processUsers() {
                     continue;
                 }
 
-                const existingUser = await query(`SELECT role FROM users WHERE email = $1`, [email]);
+                const existingUser = await db.raw(`SELECT role FROM users WHERE email = ?`, [email]);
                 if (existingUser.rows.length > 0) {
                     warnings.push(`Row ${index + 1}: Skipped - User already exists (${email})`);
                     continue;
@@ -50,11 +53,11 @@ async function processUsers() {
 
                 const queryText = `
                     INSERT INTO users (name, email, password_hash, role, created_at, status, department, year, rollno, phone)
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 `;
 
                 const values = [name, email, passwordHash, role, createdAt, 'NOTACTIVE', department, year, rollno, phone];
-                await query(queryText, values);
+                await db.raw(queryText, values);
 
                 await sendBulkEmailToUsers(email, plainPassword);
                 warnings.push(`Row ${index + 1}: Successfully processed - ${email}`);
@@ -80,6 +83,8 @@ async function processUsers() {
             status: 'error',
             message: error.message || 'Failed to process file'
         });
+    } finally {
+        await db.destroy();
     }
 }
 

@@ -12,8 +12,8 @@ const Stu_ResetPassword = () => {
   const [tokenValid, setTokenValid] = useState(false);
 
   const encryptPassword = async (password) => {
-    const SECRET_KEY = process.env.REACT_APP_KEY.slice(0, 32); // 32 bytes
-    const IV = process.env.REACT_APP_IV.slice(0, 16); // 16 bytes
+    const SECRET_KEY = import.meta.env.VITE_KEY.slice(0, 32); // 32 bytes
+    const IV = import.meta.env.VITE_IV.slice(0, 16); // 16 bytes
 
     const encoder = new TextEncoder();
     const encodedPassword = encoder.encode(password);

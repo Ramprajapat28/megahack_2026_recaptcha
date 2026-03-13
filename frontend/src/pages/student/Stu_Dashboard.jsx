@@ -477,7 +477,7 @@ function Stu_Dashboard() {
       {/* Sidebar */}
       <div
         ref={sidebarRef}
-        className={`fixed top-0 left-0 h-full bg-gray-50 text-white z-50 transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full xl:translate-x-0"
+        className={`fixed top-0 left-0 h-full bg-gray-100 text-gray-800 z-50 transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full xl:translate-x-0"
           } transition-transform duration-300 w-64 xl:block`}
       >
         <Stu_Sidebar />
@@ -620,7 +620,7 @@ function Stu_Dashboard() {
                     status={test.status}
                     questionCount={test.total_questions}
                     isEligible={test.iseligibletoattempt}
-                    lastDate={formatToReadableDate(test.created_at)}
+                    lastDate={formatToReadableDate(test.start_time || test.created_at)}
                   />
                 ))
               ) : (

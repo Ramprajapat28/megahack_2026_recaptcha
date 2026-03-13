@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
+import * as XLSX from "xlsx";
 import Adm_Sidebar from "../../components/admin/Adm_Sidebar";
 import Filter from "../../components/admin/Adm_StudentFilter";
 import AddStudent from "../../components/admin/Adm_AddStudent";
@@ -88,7 +89,7 @@ const Adm_StudentList = () => {
     try {
       let API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
 
-      let response = await axios.post(`${API_BASE_URL}/api/users/upload?role=Student`, formData, {
+      let response = await axios.post(`${API_BASE_URL}/api/users/upload?role=user`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -112,6 +113,19 @@ const Adm_StudentList = () => {
     } finally {
       setIsUploading(false);
     }
+  };
+
+  const handleDownloadSample = () => {
+    const sampleData = [
+      { name: "John Doe", email: "john@example.com", department: "INFT", year: "TE", rollno: 101, phone: 9876543210 },
+      { name: "Jane Smith", email: "jane@example.com", department: "CMPN", year: "SE", rollno: 102, phone: 9876543211 },
+    ];
+
+    const worksheet = XLSX.utils.json_to_sheet(sampleData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Sample Students");
+
+    XLSX.writeFile(workbook, "student_import_sample.xlsx");
   };
 
   const deletedUsersCounter = () => {
@@ -316,6 +330,14 @@ const Adm_StudentList = () => {
             </h1>
           </div>
           <div className="flex ml-auto mr-9">
+            <div className="bg-green-600 w-32 xl:w-40 h-14 rounded-xl flex items-center justify-center mr-5 hover:bg-green-700 transition-all duration-200 cursor-pointer">
+              <button
+                className="text-white font-poppins text-lg font-medium leading-normal "
+                onClick={handleDownloadSample}
+              >
+                Sample Excel
+              </button>
+            </div>
             <div className="bg-[#533FCC] w-32 xl:w-40 h-14 rounded-xl flex items-center justify-center mr-5 hover:bg-[#2d2170] transition-all duration-200 cursor-pointer">
               <button
                 className="text-white font-poppins text-lg font-medium leading-normal "
@@ -504,12 +526,12 @@ const Adm_StudentList = () => {
           )}
         </div>
         {isModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex justify-center items-center z-50">
             <AddStudent closeModal={closeModal} onStudentAdded={handleStudentAdded} />
           </div>
         )}
         {isEditModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex justify-center items-center z-50">
             <EditStudent
               isEditModalOpen={isEditModalOpen}
               closeEditModal={closeEditModal}
