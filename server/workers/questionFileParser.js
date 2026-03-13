@@ -21,22 +21,20 @@ const parseExcelQuestion = async (filePath, examId) => {
         const warnings = [];
 
         const jsonData = [];
+        let headers = [];
+
         worksheet.eachRow((row, rowNumber) => {
-            if (rowNumber === 1) return; // Skip header row
-            const rowData = {
-                question_text: row.getCell(1).value,
-                question_type: row.getCell(2).value,
-                category: row.getCell(3).value,
-                options_a: row.getCell(4).value,
-                options_b: row.getCell(5).value,
-                options_c: row.getCell(6).value,
-                options_d: row.getCell(7).value,
-                correct_option: row.getCell(8).value,
-                correct_options: row.getCell(9).value,
-                image_url: row.getCell(10).value
-            };
+            if (rowNumber === 1) {
+                // Read headers from the first row
+                headers = row.values.slice(1).map(h => String(h || "").trim().toLowerCase());
+                return;
+            }
+            const values = row.values.slice(1); // skip index 0 (ExcelJS uses 1-based)
+            const rowData = {};
+            headers.forEach((header, i) => {
+                rowData[header] = values[i] ?? null;
+            });
             jsonData.push(rowData);
-            console.log(jsonData);
         });
 
         for (let index = 0; index < jsonData.length; index++) {
