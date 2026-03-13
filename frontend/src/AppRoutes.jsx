@@ -14,6 +14,7 @@ import Stu_Analytics from "./pages/student/Stu_Analytics";
 import Stu_Result from "./pages/student/Stu_Result";
 import Stu_AiInterview from "./pages/student/Stu_AiInterview";
 import Stu_AiTutor from "./pages/student/Stu_AiTutor";
+import CodingQuestionPage from "./pages/student/CodingQuestionPage";
 
 import Adm_Dashboard from "./pages/admin/Adm_Dashboard";
 import Adm_CreateTestForm from "./pages/admin/Adm_CreateTestForm";
@@ -72,6 +73,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute allowedRoles={["user"]}>
             <Stu_UpcomingTest />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/coding-test"
+        element={
+          <ProtectedRoute allowedRoles={["user"]}>
+            <CodingQuestionPage />
           </ProtectedRoute>
         }
       />
