@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Tutor</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #f5f5f7;
+      color: #1d1d1f;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 64px 20px 60px;
+    }
+
+    /* ── Header ── */
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    header h1 {
+      font-size: 32px;
+      font-weight: 600;
+      letter-spacing: -0.6px;
+      color: #1d1d1f;
+    }
+    header p {
+      margin-top: 8px;
+      font-size: 15px;
+      color: #86868b;
+      font-weight: 400;
+    }
+
+    /* ── Mode Toggle ── */
+    .mode-toggle {
+      display: flex;
+      background: #e5e5ea;
+      border-radius: 10px;
+      padding: 3px;
+      gap: 2px;
+      margin-bottom: 28px;
+      width: fit-content;
+    }
+    .mode-btn {
+      padding: 7px 20px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: #86868b;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .mode-btn.active {
+      background: #fff;
+      color: #1d1d1f;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+    }
+
+    /* ── Input Card ── */
+    .input-card {
+      width: 100%;
+      max-width: 600px;
+      background: #fff;
+      border: 1px solid #d2d2d7;
+      border-radius: 14px;
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      transition: border-color 0.2s;
+    }
+    .input-card:focus-within { border-color: #0071e3; }
+
+    input#query {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      color: #1d1d1f;
+    }
+    input#query::placeholder { color: #adadb8; }
+
+    /* Clear button */
+    #clearBtn {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: none;
+      background: #d2d2d7;
+      color: #636366;
+      font-size: 13px;
+      line-height: 1;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    #clearBtn:hover { background: #c7c7cc; }
+    #clearBtn.visible { display: flex; }
+
+    /* Divider */
+    .divider {
+      width: 1px;
+      height: 22px;
+      background: #d2d2d7;
+      flex-shrink: 0;
+    }
+
+    /* Ask button */
+    #askBtn {
+      padding: 8px 18px;
+      border-radius: 8px;
+      border: none;
+      background: #0071e3;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+    #askBtn:hover { background: #0077ed; }
+    #askBtn:disabled { background: #b9d3f3; cursor: not-allowed; }
+
+    /* ── Voice Panel ── */
+    #voicePanel {
+      display: none;
+      width: 100%;
+      max-width: 600px;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+    #voicePanel.show { display: flex; }
+
+    .mic-area {
+      width: 100%;
+      background: #fff;
+      border: 1px solid #d2d2d7;
+      border-radius: 14px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+
+    #micBtn {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      border: none;
+      background: #f2f2f7;
+      color: #1d1d1f;
+      font-size: 28px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      position: relative;
+    }
+    #micBtn:hover { background: #e5e5ea; }
+    #micBtn.listening {
+      background: #ff3b30;
+      color: white;
+    }
+    #micBtn.listening::before {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 59, 48, 0.25);
+      animation: ripple 1.4s ease-out infinite;
+    }
+
+    @keyframes ripple {
+      0%   { transform: scale(1);   opacity: 1; }
+      100% { transform: scale(2.2); opacity: 0; }
+    }
+
+    #micStatus {
+      font-size: 14px;
+      color: #86868b;
+      text-align: center;
+    }
+    #micStatus.listening { color: #ff3b30; font-weight: 500; }
+
+    #transcriptPreview {
+      font-size: 15px;
+      color: #1d1d1f;
+      text-align: center;
+      font-style: italic;
+      min-height: 22px;
+    }
+
+    #voiceAskBtn {
+      padding: 10px 28px;
+      border-radius: 8px;
+      border: none;
+      background: #0071e3;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+      display: none;
+    }
+    #voiceAskBtn.show { display: block; }
+    #voiceAskBtn:hover { background: #0077ed; }
+
+    /* Browser warning */
+    #browserWarn {
+      font-size: 13px;
+      color: #ff3b30;
+      display: none;
+      text-align: center;
+    }
+
+    /* ── Loading ── */
+    #loadingRow {
+      display: none;
+      max-width: 600px;
+      width: 100%;
+      margin-top: 28px;
+      align-items: center;
+      gap: 10px;
+    }
+    #loadingRow.show { display: flex; }
+
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid #d2d2d7;
+      border-top-color: #0071e3;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    #loadingRow span { font-size: 14px; color: #86868b; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Response Card ── */
+    #responseCard {
+      display: none;
+      width: 100%;
+      max-width: 600px;
+      margin-top: 28px;
+      background: #fff;
+      border: 1px solid #d2d2d7;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+
+    .r-topic-bar {
+      padding: 14px 22px;
+      border-bottom: 1px solid #f0f0f5;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .r-topic-bar span {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #86868b;
+    }
+    .r-topic-bar strong {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1d1d1f;
+    }
+
+    .r-body { padding: 22px 24px; }
+
+    /* Unified explanation + examples as flowing prose */
+    .r-explanation {
+      font-size: 15.5px;
+      line-height: 1.8;
+      color: #1d1d1f;
+      font-weight: 400;
+    }
+
+    .r-examples {
+      margin-top: 14px;
+      font-size: 14.5px;
+      line-height: 1.7;
+      color: #3a3a3c;
+      padding: 14px 18px;
+      background: #f5f5f7;
+      border-radius: 10px;
+      border-left: 3px solid #0071e3;
+    }
+
+    .r-divider {
+      margin: 20px 0;
+      border: none;
+      border-top: 1px solid #f0f0f5;
+    }
+
+    .r-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.9px;
+      color: #adadb8;
+      margin-bottom: 8px;
+    }
+
+    .r-practice {
+      font-size: 14.5px;
+      line-height: 1.7;
+      color: #1d1d1f;
+      padding: 14px 18px;
+      background: #f5f5f7;
+      border-radius: 10px;
+    }
+
+    .r-solution {
+      font-size: 14.5px;
+      line-height: 1.7;
+      color: #1c7c1c;
+      padding: 14px 18px;
+      background: #f0faf0;
+      border-radius: 10px;
+      margin-top: 8px;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 8px;
+    }
+    .chip {
+      padding: 5px 14px;
+      border-radius: 20px;
+      border: 1px solid #d2d2d7;
+      font-size: 12.5px;
+      color: #3a3a3c;
+      cursor: pointer;
+      transition: all 0.15s;
+      background: transparent;
+      font-family: 'Inter', sans-serif;
+    }
+    .chip:hover { background: #f0f0f5; border-color: #adadb8; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>AI Tutor</h1>
+    <p>Ask anything — type it or say it.</p>
+  </header>
+
+  <!-- Mode Toggle -->
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="modeText" onclick="setMode('text')">⌨ Type</button>
+    <button class="mode-btn" id="modeVoice" onclick="setMode('voice')">🎙 Voice</button>
+  </div>
+
+  <!-- TEXT MODE -->
+  <div class="input-card" id="textPanel">
+    <input id="query" type="text" placeholder="e.g. Explain binary search…" autocomplete="off" />
+    <button id="clearBtn" title="Clear">✕</button>
+    <div class="divider"></div>
+    <button id="askBtn">Ask</button>
+  </div>
+
+  <!-- VOICE MODE -->
+  <div id="voicePanel">
+    <div class="mic-area">
+      <button id="micBtn" title="Click to start / stop listening">🎙</button>
+      <div id="micStatus">Click the mic and ask your question</div>
+      <div id="transcriptPreview"></div>
+      <button id="voiceAskBtn">Submit →</button>
+    </div>
+    <div id="browserWarn">⚠️ Voice requires Chrome or Edge browser.</div>
+  </div>
+
+  <!-- Loading -->
+  <div id="loadingRow">
+    <div class="spinner"></div>
+    <span>Thinking…</span>
+  </div>
+
+  <!-- Response -->
+  <div id="responseCard">
+    <div class="r-topic-bar">
+      <span>Topic</span>
+      <strong id="rTopic"></strong>
+    </div>
+    <div class="r-body">
+
+      <p class="r-explanation" id="rExplanation"></p>
+      <div class="r-examples" id="rExamples" style="display:none"></div>
+
+      <hr class="r-divider" id="practiceDivider" style="display:none">
+      <div id="practiceSection" style="display:none">
+        <p class="r-label">Practice</p>
+        <div class="r-practice" id="rPracticeQ"></div>
+        <div class="r-solution" id="rSolution"></div>
+      </div>
+
+      <hr class="r-divider" id="relatedDivider" style="display:none">
+      <div id="relatedSection" style="display:none">
+        <p class="r-label">Explore next</p>
+        <div class="chips" id="rRelated"></div>
+      </div>
+
+    </div>
+  </div>
+
+<script>
+const API = 'http://127.0.0.1:8000';
+let currentMode = 'text';
+let capturedTranscript = '';
+
+// ── Mode switching ────────────────────────────────────────────
+function setMode(m) {
+  currentMode = m;
+  document.getElementById('modeText').classList.toggle('active', m === 'text');
+  document.getElementById('modeVoice').classList.toggle('active', m === 'voice');
+  document.getElementById('textPanel').style.display = m === 'text' ? 'flex' : 'none';
+  document.getElementById('voicePanel').classList.toggle('show', m === 'voice');
+  // reset voice state
+  if (m === 'voice') {
+    capturedTranscript = '';
+    document.getElementById('transcriptPreview').textContent = '';
+    document.getElementById('voiceAskBtn').classList.remove('show');
+    document.getElementById('micStatus').textContent = 'Click the mic and ask your question';
+    document.getElementById('micStatus').className = '';
+  }
+}
+
+// ── Text mode ─────────────────────────────────────────────────
+const queryEl = document.getElementById('query');
+const clearBtn = document.getElementById('clearBtn');
+const askBtn   = document.getElementById('askBtn');
+
+queryEl.addEventListener('input', () => {
+  clearBtn.classList.toggle('visible', queryEl.value.length > 0);
+});
+clearBtn.addEventListener('click', () => {
+  queryEl.value = '';
+  clearBtn.classList.remove('visible');
+  queryEl.focus();
+});
+askBtn.addEventListener('click', () => {
+  const q = queryEl.value.trim();
+  if (q) submitQuery(q, 'text');
+});
+queryEl.addEventListener('keydown', e => { if (e.key === 'Enter') askBtn.click(); });
+
+// ── Voice mode ────────────────────────────────────────────────
+const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+const micBtn = document.getElementById('micBtn');
+const micStatus = document.getElementById('micStatus');
+const transcriptPreview = document.getElementById('transcriptPreview');
+const voiceAskBtn = document.getElementById('voiceAskBtn');
+let recognition = null;
+let isListening = false;
+
+if (!SpeechRec) {
+  document.getElementById('browserWarn').style.display = 'block';
+  micBtn.disabled = true;
+} else {
+  // Setup recognition — reuse the same instance to minimise permission prompts
+  recognition = new SpeechRec();
+  recognition.continuous = false;       // single utterance for precision
+  recognition.interimResults = true;    // show live transcript as you speak
+  recognition.lang = 'en-US';
+  recognition.maxAlternatives = 1;
+
+  micBtn.addEventListener('click', () => {
+    if (isListening) {
+      recognition.stop();               // user clicks again → confirm & stop
+    } else {
+      capturedTranscript = '';
+      transcriptPreview.textContent = '';
+      voiceAskBtn.classList.remove('show');
+      recognition.start();
+    }
+  });
+
+  recognition.onstart = () => {
+    isListening = true;
+    micBtn.classList.add('listening');
+    micStatus.textContent = '🔴 Listening… speak clearly';
+    micStatus.className = 'listening';
+  };
+
+  recognition.onresult = (e) => {
+    let interim = '', final = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript;
+      e.results[i].isFinal ? final += t : interim += t;
+    }
+    const display = final || interim;
+    transcriptPreview.textContent = display ? `"${display}"` : '';
+    if (final) capturedTranscript = final;
+  };
+
+  recognition.onspeechend = () => {
+    // Speech ended — stop and confirm
+    recognition.stop();
+  };
+
+  recognition.onend = () => {
+    isListening = false;
+    micBtn.classList.remove('listening');
+    if (capturedTranscript.trim()) {
+      micStatus.textContent = '✓ Got it. Click Submit to ask.';
+      micStatus.className = '';
+      voiceAskBtn.classList.add('show');
+    } else {
+      micStatus.textContent = "Didn't catch that — try again.";
+      micStatus.className = '';
+    }
+  };
+
+  recognition.onerror = (e) => {
+    isListening = false;
+    micBtn.classList.remove('listening');
+    const msgs = {
+      'not-allowed': '🔒 Mic blocked — allow it in browser settings.',
+      'no-speech':   'No speech detected — try again.',
+      'network':     'Network error — check connection.'
+    };
+    micStatus.textContent = msgs[e.error] || `Error: ${e.error}`;
+    micStatus.className = '';
+  };
+
+  voiceAskBtn.addEventListener('click', () => {
+    const q = capturedTranscript.trim();
+    if (q) submitQuery(q, 'voice');
+  });
+}
+
+// ── Core: send query ──────────────────────────────────────────
+async function submitQuery(query, mode) {
+  showLoading();
+
+  const endpoint = mode === 'voice'
+    ? `${API}/api/tutor/explain-voice`
+    : `${API}/api/tutor/explain`;
+  const body = mode === 'voice'
+    ? { transcript: query, language: 'en-US' }
+    : { query };
+
+  try {
+    const res  = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Server error');
+    render(data);
+  } catch (err) {
+    hideLoading();
+    alert('Error: ' + err.message);
+  }
+}
+
+// ── Render response ───────────────────────────────────────────
+function render(d) {
+  hideLoading();
+  const card = document.getElementById('responseCard');
+  card.style.display = 'block';
+
+  document.getElementById('rTopic').textContent = d.topic || '—';
+  document.getElementById('rExplanation').textContent = d.explanation || '';
+
+  // Examples — join into one readable block
+  const exEl = document.getElementById('rExamples');
+  if (d.examples?.length) {
+    exEl.style.display = 'block';
+    exEl.innerHTML = d.examples.map((ex, i) =>
+      `<div${i > 0 ? ' style="margin-top:10px"' : ''}>${ex}</div>`
+    ).join('');
+  } else {
+    exEl.style.display = 'none';
+  }
+
+  // Practice + solution
+  const ps = document.getElementById('practiceSection');
+  const pd = document.getElementById('practiceDivider');
+  if (d.practice_question) {
+    document.getElementById('rPracticeQ').textContent = d.practice_question;
+    document.getElementById('rSolution').textContent = d.solution || '';
+    ps.style.display = 'block';
+    pd.style.display = 'block';
+  } else {
+    ps.style.display = 'none';
+    pd.style.display = 'none';
+  }
+
+  // Related topic chips
+  const rs = document.getElementById('relatedSection');
+  const rd = document.getElementById('relatedDivider');
+  const chips = document.getElementById('rRelated');
+  chips.innerHTML = '';
+  if (d.related_topics?.length) {
+    d.related_topics.forEach(t => {
+      const c = document.createElement('button');
+      c.className = 'chip';
+      c.textContent = t;
+      c.onclick = () => {
+        setMode('text');
+        queryEl.value = t;
+        clearBtn.classList.add('visible');
+        submitQuery(t, 'text');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      };
+      chips.appendChild(c);
+    });
+    rs.style.display = 'block';
+    rd.style.display = 'block';
+  } else {
+    rs.style.display = 'none';
+    rd.style.display = 'none';
+  }
+
+  card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── Helpers ───────────────────────────────────────────────────
+function showLoading() {
+  document.getElementById('loadingRow').classList.add('show');
+  askBtn.disabled = true;
+  voiceAskBtn.classList.remove('show');
+  document.getElementById('responseCard').style.display = 'none';
+}
+function hideLoading() {
+  document.getElementById('loadingRow').classList.remove('show');
+  askBtn.disabled = false;
+}
+</script>
+</body>
+</html>

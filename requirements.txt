@@ -83,3 +83,8 @@ zstandard==0.23.0
 fastapi>=0.110.0
 uvicorn>=0.29.0
 python-dotenv>=1.0.1
+langchain-groq>=0.1.0
+langchain-core>=0.1.0
+pydantic>=2.0.0
+# Web Speech API is browser-native - no Python package required
+# speech.py uses window.SpeechRecognition (frontend JS only)
