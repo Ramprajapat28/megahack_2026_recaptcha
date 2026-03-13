@@ -36,6 +36,37 @@ const createExam = async (exam) => {
   }
 };
 
+const getExamsByStatus = async (status, role, branch, yearFilter) => {
+  try {
+
+    let query = dbWrite("exams")
+      .select("*")
+      .where("status", status)
+      .andWhere("exam_for", role);
+
+    // filter by branch
+    if (branch) {
+      query = query.whereRaw("? = ANY(target_branches)", [branch]);
+    }
+
+    // filter by year
+    if (yearFilter) {
+      query = query.whereRaw("? = ANY(target_years)", [yearFilter]);
+    }
+
+    // future exams only
+    query = query.andWhere("start_time", ">", dbWrite.fn.now());
+
+    const exams = await query.orderBy("start_time", "asc");
+
+    return exams;
+
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+};
+
 /*
 GET ALL EXAMS
 */
@@ -247,5 +278,6 @@ module.exports = {
   ExamCount,
   getExamStatusById,
   getAllScheduledExams,
-  getExamsByTeacherId
+  getExamsByTeacherId,
+  getExamsByStatus
 };
