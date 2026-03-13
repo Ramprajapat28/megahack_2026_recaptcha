@@ -526,12 +526,12 @@ const Adm_StudentList = () => {
           )}
         </div>
         {isModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex justify-center items-center z-50">
             <AddStudent closeModal={closeModal} onStudentAdded={handleStudentAdded} />
           </div>
         )}
         {isEditModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex justify-center items-center z-50">
             <EditStudent
               isEditModalOpen={isEditModalOpen}
               closeEditModal={closeEditModal}

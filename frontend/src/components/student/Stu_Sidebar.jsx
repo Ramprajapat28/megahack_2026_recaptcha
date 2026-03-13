@@ -66,6 +66,36 @@ function Stu_Sidebar() {
           </span>
          Analytics</NavLink>
         </li>
+
+        {/* Roadmap */}
+        <li className="flex items-center p-2 text-black cursor-pointer transition-colors duration-300 hover:text-blue-500 group">
+          <a
+            href="https://roadmap.sh/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center w-full text-black hover:text-blue-500"
+          >
+            <span className="mr-2 flex items-center justify-center w-6 h-6">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M9 20L3 17V4L9 7M9 20L15 17M9 20V7M15 17L21 20V7L15 4M15 17V4M9 7L15 4"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="group-hover:stroke-blue-500 transition-colors duration-300"
+                />
+              </svg>
+            </span>
+            Roadmaps
+          </a>
+        </li>
       </ul>
     </div>
   );
