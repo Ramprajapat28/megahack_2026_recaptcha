@@ -4,6 +4,7 @@ import { Route, Routes } from "react-router-dom";
 
 // Pages
 import Login from "./pages/Login";
+import LandingPage from "./pages/LandingPage";
 
 import MCQExamPage from "./pages/student/Stu_MCQExamPage";
 import ResetPassword from "./pages/student/Stu_ResetPassword";
@@ -38,7 +39,8 @@ const AppRoutes = () => {
   return (
     <Routes>
       {/* Public Routes */}
-      <Route path="/" element={<Login />} />
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/login" element={<Login />} />
 
       {/* Student Routes */}
       <Route
