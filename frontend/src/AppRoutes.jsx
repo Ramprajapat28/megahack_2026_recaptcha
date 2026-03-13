@@ -12,6 +12,8 @@ import Stu_UpcomingTest from "./pages/student/Stu_UpcomingTest";
 import Stu_TestInstruction from "./pages/student/Stu_TestInstruction";
 import Stu_Analytics from "./pages/student/Stu_Analytics";
 import Stu_Result from "./pages/student/Stu_Result";
+import Stu_AiInterview from "./pages/student/Stu_AiInterview";
+import Stu_AiTutor from "./pages/student/Stu_AiTutor";
 import CodingQuestionPage from "./pages/student/CodingQuestionPage";
 
 import Adm_Dashboard from "./pages/admin/Adm_Dashboard";
@@ -45,7 +47,7 @@ const AppRoutes = () => {
       <Route
         path="/home"
         element={
-          <ProtectedRoute allowedRoles={["Student"]}>
+          <ProtectedRoute allowedRoles={["user"]}>
             <Stu_Dashboard />
           </ProtectedRoute>
         }
@@ -53,7 +55,7 @@ const AppRoutes = () => {
       <Route
         path="/test-instruction"
         element={
-          <ProtectedRoute allowedRoles={["Student"]}>
+          <ProtectedRoute allowedRoles={["user"]}>
             <Stu_TestInstruction />
           </ProtectedRoute>
         }
@@ -61,7 +63,7 @@ const AppRoutes = () => {
       <Route
         path="/exam"
         element={
-          <ProtectedRoute allowedRoles={["Student"]}>
+          <ProtectedRoute allowedRoles={["user"]}>
             <MCQExamPage />
           </ProtectedRoute>
         }
@@ -69,7 +71,7 @@ const AppRoutes = () => {
       <Route
         path="/upcoming-tests"
         element={
-          <ProtectedRoute allowedRoles={["Student"]}>
+          <ProtectedRoute allowedRoles={["user"]}>
             <Stu_UpcomingTest />
           </ProtectedRoute>
         }
@@ -77,16 +79,33 @@ const AppRoutes = () => {
       <Route
         path="/analytics"
         element={
-          <ProtectedRoute allowedRoles={["Student"]}>
+          <ProtectedRoute allowedRoles={["user"]}>
             <Stu_Analytics />
           </ProtectedRoute>
         }
       />
       <Route
-        path="student/results"
+        path="user/results"
         element={
-          <ProtectedRoute allowedRoles={["Student"]}>
+          <ProtectedRoute allowedRoles={["user"]}>
             <Stu_Result />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/ai-interview"
+        element={
+          <ProtectedRoute allowedRoles={["user"]}>
+            <Stu_AiInterview />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/ai-tutor"
+        element={
+          <ProtectedRoute allowedRoles={["user"]}>
+            <Stu_AiTutor />
           </ProtectedRoute>
         }
       />
@@ -102,7 +121,7 @@ const AppRoutes = () => {
       {/* <Route
         path="/analytics/:user_id"
         element={
-          <ProtectedRoute allowedRoles={["Student"]}>
+          <ProtectedRoute allowedRoles={["user"]}>
             <Stu_Analytics />
           </ProtectedRoute>
         }
@@ -112,7 +131,7 @@ const AppRoutes = () => {
       <Route
         path="/admin"
         element={
-          <ProtectedRoute allowedRoles={["TPO"]}>
+          <ProtectedRoute allowedRoles={["admin"]}>
             <Adm_Dashboard />
           </ProtectedRoute>
         }
@@ -120,7 +139,7 @@ const AppRoutes = () => {
       <Route
         path="/admin/createtest"
         element={
-          <ProtectedRoute allowedRoles={["TPO"]}>
+          <ProtectedRoute allowedRoles={["admin"]}>
             <Adm_CreateTestForm />
           </ProtectedRoute>
         }
@@ -128,7 +147,7 @@ const AppRoutes = () => {
       <Route
         path="/admin/input"
         element={
-          <ProtectedRoute allowedRoles={["TPO"]}>
+          <ProtectedRoute allowedRoles={["admin"]}>
             <Adm_InputQuestions />
           </ProtectedRoute>
         }
@@ -136,7 +155,7 @@ const AppRoutes = () => {
       <Route
         path="/admin/viewquestions"
         element={
-          <ProtectedRoute allowedRoles={["TPO"]}>
+          <ProtectedRoute allowedRoles={["admin"]}>
             <Adm_ViewQuestions />
           </ProtectedRoute>
         }
@@ -144,7 +163,7 @@ const AppRoutes = () => {
       <Route
         path="/admin/studentlist"
         element={
-          <ProtectedRoute allowedRoles={["TPO"]}>
+          <ProtectedRoute allowedRoles={["admin"]}>
             <Adm_StudentList />
           </ProtectedRoute>
         }
@@ -152,7 +171,7 @@ const AppRoutes = () => {
       <Route
         path="/admin/teststudentlist"
         element={
-          <ProtectedRoute allowedRoles={["TPO"]}>
+          <ProtectedRoute allowedRoles={["admin"]}>
             <Adm_TestStudentList />
           </ProtectedRoute>
         }
@@ -160,7 +179,7 @@ const AppRoutes = () => {
       <Route
         path="/drafted-tests"
         element={
-          <ProtectedRoute allowedRoles={["TPO"]}>
+          <ProtectedRoute allowedRoles={["admin"]}>
             <Adm_DraftTest />
           </ProtectedRoute>
         }
@@ -168,7 +187,7 @@ const AppRoutes = () => {
       <Route
         path="/scheduled-tests"
         element={
-          <ProtectedRoute allowedRoles={["TPO"]}>
+          <ProtectedRoute allowedRoles={["admin"]}>
             <Adm_ScheduleTest />
           </ProtectedRoute>
         }
@@ -176,7 +195,7 @@ const AppRoutes = () => {
       <Route
         path="/past-tests"
         element={
-          <ProtectedRoute allowedRoles={["TPO"]}>
+          <ProtectedRoute allowedRoles={["admin"]}>
             <Adm_PastTest />
           </ProtectedRoute>
         }
@@ -184,7 +203,7 @@ const AppRoutes = () => {
       <Route
         path="/live-tests"
         element={
-          <ProtectedRoute allowedRoles={["TPO"]}>
+          <ProtectedRoute allowedRoles={["admin"]}>
             <Adm_LiveTest />
           </ProtectedRoute>
         }
@@ -192,7 +211,7 @@ const AppRoutes = () => {
       <Route
         path="/admin/analytics"
         element={
-          <ProtectedRoute allowedRoles={["TPO"]}>
+          <ProtectedRoute allowedRoles={["admin"]}>
             <Adm_Analytics />
           </ProtectedRoute>
         }
@@ -200,7 +219,7 @@ const AppRoutes = () => {
       <Route
         path="/admin/student-analysis"
         element={
-          <ProtectedRoute allowedRoles={["TPO"]}>
+          <ProtectedRoute allowedRoles={["admin"]}>
             <Adm_StudentAnalysis />
           </ProtectedRoute>
         }
@@ -208,7 +227,7 @@ const AppRoutes = () => {
       <Route
         path="/admin/student-analytics"
         element={
-          <ProtectedRoute allowedRoles={["TPO"]}>
+          <ProtectedRoute allowedRoles={["admin"]}>
             <Adm_StudentAnalytics />
           </ProtectedRoute>
         }
@@ -216,7 +235,7 @@ const AppRoutes = () => {
       <Route
         path="/admin/overall-score"
         element={
-          <ProtectedRoute allowedRoles={["TPO"]}>
+          <ProtectedRoute allowedRoles={["admin"]}>
             <Adm_OverallScore />
           </ProtectedRoute>
         }
@@ -225,7 +244,7 @@ const AppRoutes = () => {
       <Route
         path="/admin/mcq-generator"
         element={
-          <ProtectedRoute allowedRoles={["TPO"]}>
+          <ProtectedRoute allowedRoles={["admin"]}>
             <Adm_McqGenerator />
           </ProtectedRoute>
         }

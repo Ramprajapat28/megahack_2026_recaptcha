@@ -22,6 +22,8 @@ const Stu_MCQExamPage = () => {
   const [testSubmitted, setTestSubmitted] = useState(false);
   const [timeUp, setTimeUp] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false); // Add loading state
+  const [remainingTime, setRemainingTime] = useState(0);
+  const isSubmittingRef = useRef(false);
 
   const examId = location.state?.examId;
   const Duration = location.state?.Duration;
@@ -61,15 +63,19 @@ const Stu_MCQExamPage = () => {
     }
   };
 
-  const handleSubmitTest = async (questions) => {
-    if (isSubmitting || testSubmitted) return; // Prevent multiple submissions
+  const handleSubmitTest = async (questionsArg) => {
+    const questionsToSubmit = questionsArg || questions;
+    if (isSubmittingRef.current || isSubmitting || testSubmitted) return; // Prevent multiple submissions
 
+    isSubmittingRef.current = true;
     setIsSubmitting(true);
     setTestSubmitted(true);
 
     try {
-      await submitFinalResponse(questions);
-      socketRef.current?.emit("submit_responses");
+      await submitFinalResponse(questionsToSubmit);
+      // socketRef.current?.emit("submit_responses");
+
+       socketRef.current?.emit("submit_responses", { exam_id: examId });
 
       // Clear Redux state
       dispatch(clearExamId(examId));
@@ -81,6 +87,7 @@ const Stu_MCQExamPage = () => {
     } catch (error) {
       console.error("Error during test submission:", error);
       alert("There was an error submitting your test. Please try again.");
+      isSubmittingRef.current = false;
       setIsSubmitting(false);
       setTestSubmitted(false);
     }
@@ -144,6 +151,39 @@ const Stu_MCQExamPage = () => {
   }, [tabSwitchCount, testSubmitted, isSubmitting]);
 
 
+  useEffect(() => {
+  const API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
+
+  socketRef.current = io(`${API_BASE_URL}/exams/start-exam`, {
+    withCredentials: true,
+    transports: ["websocket"],
+  });
+
+  socketRef.current.on("connect", () => {
+    console.log("✅ Socket connected:", socketRef.current.id);
+
+    socketRef.current.emit("start_exam", {
+      exam_id: examId,
+      duration: Duration,
+    });
+  });
+
+  socketRef.current.on("timer_update", ({ remainingTime }) => {
+    console.log("⏱ Timer:", remainingTime);
+    setRemainingTime(remainingTime);
+  });
+
+  socketRef.current.on("exam_ended", () => {
+    console.log("Time up");
+    setTimeUp(true);
+  });
+
+  return () => {
+    socketRef.current?.disconnect();
+  };
+}, [examId, Duration]);
+
+
 
   // Handle time up
   useEffect(() => {
@@ -201,7 +241,7 @@ const Stu_MCQExamPage = () => {
           </div>
         )}
 
-        <Question socketRef={socketRef} />
+        <Question socketRef={socketRef} remainingTime={remainingTime} />
         <Sidebar name={userName} onSubmitTest={() => handleSubmitTest(questions)} />
       </div>
     </div>

@@ -36,7 +36,40 @@ const createExam = async (exam) => {
   }
 };
 
+// const getExamsByStatus = async (status, role, branch, yearFilter) => {
+//   try {
+
+//     let query = dbWrite("exams")
+//       .select("*")
+//       .where("status", status)
+//       .andWhere("exam_for", role);
+
+//     // filter by branch
+//     if (branch) {
+//       query = query.whereRaw("? = ANY(target_branches)", [branch]);
+//     }
+
+//     // filter by year
+//     if (yearFilter) {
+//       query = query.whereRaw("? = ANY(target_years)", [yearFilter]);
+//     }
+
+//     // Future exams only if scheduled
+//     if (status === 'scheduled') {
+//         query = query.andWhere("start_time", ">", dbWrite.fn.now());
+//     }
+
+//     const exams = await query.orderBy("start_time", "asc");
+
+//     return exams;
+
+//   } catch (err) {
+//     console.error(err);
+//     throw err;
+//   }
+// };
 const getExamsByStatus = async (status, role, branch, yearFilter) => {
+  console.log(status, role, branch, yearFilter,"status, role, branch, yearFilter")
   try {
 
     let query = dbWrite("exams")
@@ -66,12 +99,72 @@ const getExamsByStatus = async (status, role, branch, yearFilter) => {
     throw err;
   }
 };
+const getExamsByStatusforadmin = async (status) => {
+  console.log(status, "dsnsddndd")
+  try {
 
+    let exams = await dbWrite("exams as e")
+      .leftJoin("questions as q", "e.exam_id", "q.exam_id")
+      .select(
+        "e.*",
+        dbWrite.raw("COUNT(q.question_id) as questions") // Admin frontend seems to expect "questions"
+      )
+      .where("e.status", status)
+      .groupBy("e.exam_id")
+      .orderBy("e.start_time", "asc");
+
+    return exams;
+
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+};
+
+const getExamsForUser = async (status, branches, years) => {
+
+  let query = dbWrite("exams as e")
+    .leftJoin("questions as q", "e.exam_id", "q.exam_id")
+    .select(
+      "e.exam_id",
+      "e.exam_name",
+      "e.duration",
+      "e.start_time",
+      "e.end_time",
+      "e.status",
+      dbWrite.raw("COUNT(q.question_id) as total_questions")
+    )
+    .where("e.status", status)
+    .groupBy("e.exam_id", "e.exam_name", "e.duration", "e.start_time", "e.end_time", "e.status");
+
+  if (branches?.length) {
+    query.whereRaw(
+      "e.target_branches && ARRAY[?]::branch_enum[]",
+      [branches[0]]
+    );
+  }
+
+  if (years?.length) {
+    query.whereRaw(
+      "e.target_years && ARRAY[?]::year_enum[]",
+      [years[0]]
+    );
+  }
+
+  console.log("Generated SQL:", query.toString());
+
+  const exams = await query.orderBy("e.start_time", "asc");
+
+  console.log("Exams Found:", exams);
+
+  return exams;
+};
 
 const getPaginatedExams = async (page, limit, status, role, branch, yearFilter) => {
   try {
 
     const offset = (page - 1) * limit;
+    const exam_for = role === "admin" || role === "user" ? "user" : "user";
 
     let query = dbWrite("exams")
       .select(
@@ -83,7 +176,7 @@ const getPaginatedExams = async (page, limit, status, role, branch, yearFilter) 
         "status"
       )
       .where("status", status)
-      .andWhere("exam_for", role);
+      .andWhere("exam_for", exam_for);
 
     // Branch filter
     if (branch) {
@@ -95,8 +188,10 @@ const getPaginatedExams = async (page, limit, status, role, branch, yearFilter) 
       query = query.whereRaw("? = ANY(target_years)", [yearFilter]);
     }
 
-    // Future exams only
-    query = query.andWhere("start_time", ">", dbWrite.fn.now());
+    // Future exams only if scheduled
+    if (status === 'scheduled') {
+        query = query.andWhere("start_time", ">", dbWrite.fn.now());
+    }
 
     const exams = await query
       .orderBy("start_time", "asc")
@@ -230,9 +325,7 @@ EXAM COUNT
 */
 const ExamCount = async (role) => {
 
-  const exam_for = role === "President" || role === "Teacher"
-    ? "Teacher"
-    : "Student";
+  const exam_for = role === "admin" || role === "user" ? "user" : "user";
 
   const result = await dbWrite("exams")
     .select("status")
@@ -321,7 +414,9 @@ module.exports = {
   ExamCount,
   getExamStatusById,
   getAllScheduledExams,
+  getExamsByStatusforadmin,
   getExamsByTeacherId,
   getExamsByStatus,
-  getPaginatedExams
+  getPaginatedExams,
+  getExamsForUser
 };

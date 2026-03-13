@@ -33,21 +33,33 @@ const Adm_McqGenerator = ({ onClose }) => {
   const dispatch = useDispatch();
   const { mcqSets, isGenerating, error } = useSelector((state) => state.mcq);
 
-  const [topic, setTopic] = useState("");
-  const [difficulty, setDifficulty] = useState("medium");
-  const [numQuestions, setNumQuestions] = useState(10);
-  const [questionType, setQuestionType] = useState("academic");
+  const AI_API_URL = import.meta.env.VITE_AI_API_URL || "http://127.0.0.1:8000";
+
+  const [activeTab, setActiveTab] = useState("topic"); // "topic" | "jd" | "company"
+
+  // shared
+  const [difficulty, setDifficulty] = useState("Medium");
+  const [numQuestions, setNumQuestions] = useState(5);
   const [uploadedFile, setUploadedFile] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [collapsedSets, setCollapsedSets] = useState(new Set());
-  const [testsData, setTestsData] = useState({
-    drafted: [],
-    scheduled: [],
-    past: [],
-    live: [],
-  });
-  const [selectedQuestions, setSelectedQuestions] = useState({}); // Track selected questions: { [setId]: Set(questionId) }
+  const [testsData, setTestsData] = useState({ drafted: [], scheduled: [], past: [], live: [] });
+  const [selectedQuestions, setSelectedQuestions] = useState({});
   const sidebarRef = useRef(null);
+
+  // Topic tab
+  const [topic, setTopic] = useState("");
+  const [jobDescription, setJobDescription] = useState("");
+
+  // JD tab
+  const [jdRole, setJdRole] = useState("");
+  const [skills, setSkills] = useState("");
+  const [experience, setExperience] = useState("0-2 years");
+
+  // Company tab
+  const [company, setCompany] = useState("");
+  const [companyRole, setCompanyRole] = useState("");
+  const [category, setCategory] = useState("technical");
 
   console.log(mcqSets);
   console.log(selectedQuestions);
@@ -122,187 +134,144 @@ const Adm_McqGenerator = ({ onClose }) => {
     }
   };
 
-  const handleGenerate = async () => {
-    if (!uploadedFile && !topic.trim()) {
-      dispatch(setError("Please either upload a PDF file or enter a topic"));
+  // ── Helper: map raw API questions to internal MCQ format ──
+  const transformQuestions = (mcqData, topicLabel, catLabel) => {
+    return mcqData.map((mcq, index) => {
+      const opts = mcq.options || {};
+      let options;
+      if (opts.A !== undefined) {
+        options = [opts.A || "", opts.B || "", opts.C || "", opts.D || ""];
+      } else if (Array.isArray(mcq.options)) {
+        options = mcq.options;
+      } else {
+        options = ["Option A", "Option B", "Option C", "Option D"];
+      }
+      const answerLetter = String(mcq.correct_answer || "A").toUpperCase();
+      const correctIndex = { A: 0, B: 1, C: 2, D: 3 }[answerLetter] ?? 0;
+      return {
+        id: mcq.id || index + 1,
+        question: mcq.question || "No question provided",
+        options,
+        correct_answer: correctIndex,
+        explanation: mcq.explanation || "",
+        bloom_level: "",
+        estimated_time_seconds: 0,
+        tags: [],
+        category: catLabel,
+      };
+    });
+  };
+
+  // ── Topic generate ──
+  const handleTopicGenerate = async () => {
+    if (!topic.trim()) {
+      dispatch(setError("Please enter a topic"));
       return;
     }
-
-    if (numQuestions < 1 || numQuestions > 50) {
-      dispatch(setError("Number of questions must be between 1 and 50"));
-      return;
-    }
-
     dispatch(setGenerating(true));
     dispatch(setError(""));
-
     try {
-      let requestData;
-      let headers = {};
-      let apiEndpoint;
-
-      if (uploadedFile) {
-        // Use the PDF-specific endpoint
-        apiEndpoint = "https://finalquestiongen.onrender.com/generate_mcqs_from_pdf";
-
-        const formData = new FormData();
-        formData.append("pdf_file", uploadedFile);
-        formData.append("difficulty", difficulty);
-        formData.append("num_questions", numQuestions.toString());
-        formData.append("question_type", questionType);
-
-        // Add topic if provided
-        if (topic.trim()) {
-          formData.append("topic", topic);
-        }
-
-        requestData = formData;
-        headers["Content-Type"] = "multipart/form-data";
-      } else {
-        // Use the existing topic-based endpoint
-        apiEndpoint = "https://finalquestiongen.onrender.com/generate_mcqs";
-
-        requestData = {
-          topic: topic.trim(),
-          difficulty: difficulty,
-          num_questions: numQuestions,
-          question_type: questionType,
-        };
-        headers["Content-Type"] = "application/json";
+      // Build payload matching exact required fields
+      const payload = { 
+        topic: topic.trim(), 
+        difficulty: difficulty, 
+        category: category,
+        num_questions: parseInt(numQuestions) 
+      };
+      
+      // Only attach job_description if it was actually provided
+      if (jobDescription.trim()) {
+        payload.job_description = jobDescription.trim();
       }
 
-      const response = await axios.post(apiEndpoint, requestData, {
-        headers: headers,
-        timeout: 300000,
-      });
-
-      // Rest of the response handling code remains the same...
-      let mcqData = null;
-
-      // Handle different response formats
-      if (Array.isArray(response.data)) {
-        mcqData = response.data;
-      } else if (
-        response.data &&
-        response.data.mcqs &&
-        Array.isArray(response.data.mcqs)
-      ) {
-        mcqData = response.data.mcqs;
-      } else if (
-        response.data &&
-        response.data.data &&
-        Array.isArray(response.data.data)
-      ) {
-        mcqData = response.data.data;
-      } else if (
-        response.data &&
-        response.data.questions &&
-        Array.isArray(response.data.questions)
-      ) {
-        mcqData = response.data.questions;
-      } else if (response.data && typeof response.data === "object") {
-        mcqData = [response.data];
-      }
-
-      if (mcqData && Array.isArray(mcqData) && mcqData.length > 0) {
-        const transformedMCQs = mcqData.map((mcq, index) => {
-          let options = [];
-          if (mcq.options && typeof mcq.options === "object") {
-            if (
-              mcq.options.A &&
-              mcq.options.B &&
-              mcq.options.C &&
-              mcq.options.D
-            ) {
-              options = [
-                mcq.options.A,
-                mcq.options.B,
-                mcq.options.C,
-                mcq.options.D,
-              ];
-            } else if (Array.isArray(mcq.options)) {
-              options = mcq.options;
-            }
-          } else if (Array.isArray(mcq.options)) {
-            options = mcq.options;
-          }
-
-          let correctAnswerIndex = 0;
-          if (typeof mcq.correct_answer === "string") {
-            const letter = mcq.correct_answer.toUpperCase();
-            correctAnswerIndex =
-              letter === "A"
-                ? 0
-                : letter === "B"
-                  ? 1
-                  : letter === "C"
-                    ? 2
-                    : letter === "D"
-                      ? 3
-                      : 0;
-          } else if (typeof mcq.correct_answer === "number") {
-            correctAnswerIndex = mcq.correct_answer;
-          }
-          const category = mcq.question_type;
-          return {
-            id: mcq.id || index + 1,
-            question: mcq.question || "No question provided",
-            options:
-              options.length > 0
-                ? options
-                : ["Option A", "Option B", "Option C", "Option D"],
-            correct_answer: correctAnswerIndex,
-            explanation: mcq.explanation || "",
-            bloom_level: mcq.bloom_level || "",
-            estimated_time_seconds: mcq.estimated_time_seconds || 0,
-            tags: mcq.tags || [],
-            category: category,
-          };
-        });
-
-        // Add new MCQ set to Redux store
-        dispatch(
-          addMcqSet({
-            topic: topic.trim() || "PDF Content",
-            difficulty,
-            questionType,
-            mcqs: transformedMCQs,
-            fileName: uploadedFile?.name || null,
-          })
-        );
-
-        // Clear form
-        setTopic("");
-        setUploadedFile(null);
-      } else {
-        throw new Error(`Invalid response format from server`);
-      }
-    } catch (error) {
-      console.error("Error generating MCQs:", error);
-
-      let errorMessage = "Failed to generate MCQs";
-      if (error.response) {
-        if (error.response.data && error.response.data.message) {
-          errorMessage = error.response.data.message;
-        } else if (
-          error.response.data &&
-          typeof error.response.data === "string"
-        ) {
-          errorMessage = error.response.data;
-        } else {
-          errorMessage = `Server responded with status ${error.response.status}`;
-        }
-      } else if (error.request) {
-        errorMessage = "No response from server. Please check your connection.";
-      } else {
-        errorMessage = error.message;
-      }
-
-      dispatch(setError(errorMessage));
+      const response = await axios.post(
+        `${AI_API_URL}/api/generate-questions`,
+        payload,
+        { headers: { "Content-Type": "application/json" }, timeout: 120000 }
+      );
+      const mcqData = response.data?.questions || response.data;
+      if (!Array.isArray(mcqData) || mcqData.length === 0) throw new Error("No questions returned");
+      dispatch(addMcqSet({ topic: topic.trim(), difficulty, questionType: "topic", mcqs: transformQuestions(mcqData, topic, "technical"), fileName: null }));
+      setTopic("");
+      setJobDescription("");
+    } catch (err) {
+      dispatch(setError(err.response?.data?.message || err.message || "Failed to generate questions"));
     } finally {
       dispatch(setGenerating(false));
     }
   };
+
+  // ── JD generate ──
+  const handleJdGenerate = async () => {
+    if (!jdRole.trim() || !skills.trim()) {
+      dispatch(setError("Please enter Role and Skills"));
+      return;
+    }
+    dispatch(setGenerating(true));
+    dispatch(setError(""));
+    try {
+      const response = await axios.post(
+        `${AI_API_URL}/api/generate/jd`,
+        { 
+          role: jdRole.trim(), 
+          skills: skills.trim(), 
+          experience: experience, 
+          difficulty: difficulty, 
+          category: category,
+          num_questions: parseInt(numQuestions) 
+        },
+        { headers: { "Content-Type": "application/json" }, timeout: 120000 }
+      );
+      const mcqData = response.data?.questions || response.data;
+      if (!Array.isArray(mcqData) || mcqData.length === 0) throw new Error("No questions returned");
+      dispatch(addMcqSet({ topic: `${jdRole} (JD)`, difficulty, questionType: "jd", mcqs: transformQuestions(mcqData, jdRole, "technical"), fileName: null }));
+      setJdRole("");
+      setSkills("");
+    } catch (err) {
+      dispatch(setError(err.response?.data?.message || err.message || "Failed to generate questions"));
+    } finally {
+      dispatch(setGenerating(false));
+    }
+  };
+
+  // ── Company generate ──
+  const handleCompanyGenerate = async () => {
+    if (!company.trim() || !companyRole.trim()) {
+      dispatch(setError("Please enter both Company and Role"));
+      return;
+    }
+    if (numQuestions < 1 || numQuestions > 20) {
+      dispatch(setError("Number of questions must be between 1 and 20"));
+      return;
+    }
+    dispatch(setGenerating(true));
+    dispatch(setError(""));
+    try {
+      const response = await axios.post(
+        `${AI_API_URL}/api/generate/company`,
+        { 
+          company: company.trim(), 
+          role: companyRole.trim(), 
+          difficulty: difficulty, 
+          category: category,
+          num_questions: parseInt(numQuestions) 
+        },
+        { headers: { "Content-Type": "application/json" }, timeout: 120000 }
+      );
+      const mcqData = response.data?.questions;
+      if (!Array.isArray(mcqData) || mcqData.length === 0) throw new Error("No questions returned from the API");
+      dispatch(addMcqSet({ topic: `${company} – ${companyRole}`, difficulty, questionType: category, mcqs: transformQuestions(mcqData, company, category), fileName: null }));
+      setCompany("");
+      setCompanyRole("");
+    } catch (error) {
+      dispatch(setError(error.response?.data?.message || error.message || "Failed to generate questions"));
+    } finally {
+      dispatch(setGenerating(false));
+    }
+  };
+
+
+
 
   const toggleSetCollapse = (setId) => {
     const newCollapsed = new Set(collapsedSets);
@@ -546,19 +515,35 @@ const Adm_McqGenerator = ({ onClose }) => {
 
           {/* Input Area Component */}
           <InputAreaComponent
-            topic={topic}
-            setTopic={setTopic}
             difficulty={difficulty}
             setDifficulty={setDifficulty}
             numQuestions={numQuestions}
             setNumQuestions={setNumQuestions}
-            questionType={questionType}
-            setQuestionType={setQuestionType}
+            isGenerating={isGenerating}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            topic={topic}
+            setTopic={setTopic}
+            jobDescription={jobDescription}
+            setJobDescription={setJobDescription}
+            handleTopicGenerate={handleTopicGenerate}
+            jdRole={jdRole}
+            setJdRole={setJdRole}
+            skills={skills}
+            setSkills={setSkills}
+            experience={experience}
+            setExperience={setExperience}
+            handleJdGenerate={handleJdGenerate}
+            company={company}
+            setCompany={setCompany}
+            companyRole={companyRole}
+            setCompanyRole={setCompanyRole}
+            category={category}
+            setCategory={setCategory}
+            handleCompanyGenerate={handleCompanyGenerate}
             uploadedFile={uploadedFile}
             setUploadedFile={setUploadedFile}
-            isGenerating={isGenerating}
             handleFileUpload={handleFileUpload}
-            handleGenerate={handleGenerate}
           />
         </div>
       </div>

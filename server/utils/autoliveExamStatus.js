@@ -10,15 +10,12 @@ const autoUpdate = cron.schedule("* * * * *", async () => {
       .andWhere("start_time", "<=", dbWrite.fn.now())
       .update({ status: "live" });
 
-    // live → past
-    const pastUpdate = await dbWrite("exams")
-      .where("status", "live")
-      .andWhere("end_time", "<=", dbWrite.fn.now())
-      .update({ status: "past" });
+    
+    
 
-    if (liveUpdate || pastUpdate) {
+    if (liveUpdate ) {
       console.log(
-        `Cron Update: ${liveUpdate} exams → live, ${pastUpdate} exams → past`
+        `Cron Update: ${liveUpdate} exams → live`
       );
     }
 

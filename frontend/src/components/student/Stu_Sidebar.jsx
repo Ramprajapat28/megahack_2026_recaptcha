@@ -9,7 +9,7 @@ function Stu_Sidebar() {
 
   return (
     <div className="fixed left-0 top-0 w-64 h-full p-5 font-sans z-50">
-      <h2 className="text-blue-700 text-2xl font-bold mb-12">Aptitude</h2>
+      <h2 className="text-blue-700 text-3xl font-bold mb-12">Aptitude</h2>
       <ul className="list-none p-0 m-0">
         {/* Dashboard */}
         <li
@@ -65,6 +65,63 @@ function Stu_Sidebar() {
             </svg>
           </span>
          Analytics</NavLink>
+        </li>
+
+        {/* Roadmap */}
+        <li className="flex items-center p-2 text-black cursor-pointer transition-colors duration-300 hover:text-blue-500 group">
+          <a
+            href="https://roadmap.sh/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center w-full text-black hover:text-blue-500"
+          >
+            <span className="mr-2 flex items-center justify-center w-6 h-6">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M9 20L3 17V4L9 7M9 20L15 17M9 20V7M15 17L21 20V7L15 4M15 17V4M9 7L15 4"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="group-hover:stroke-blue-500 transition-colors duration-300"
+                />
+              </svg>
+            </span>
+            Roadmaps
+          </a>
+        </li>
+        {/* AI Interview */}
+        <li
+          className="flex items-center p-2 text-black cursor-pointer transition-colors duration-300 hover:text-blue-500 group "
+            onClick={() => navigate(`/ai-interview`)}
+        >
+           <NavLink to={`/ai-interview`} className={({ isActive }) => 
+              `flex items-center w-full ${isActive ? "text-blue-500" : "text-black hover:text-blue-500"}`
+            }>
+          <span className="mr-2 flex items-center justify-center w-6 h-6 ">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-brain group-hover:stroke-blue-500 transition-colors duration-300"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/><path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/><path d="M17.599 6.5a3 3 0 0 0 .399-1.375"/></svg>
+          </span>
+         AI Interview</NavLink>
+        </li>
+
+        {/* AI Tutor */}
+        <li
+          className="flex items-center p-2 text-black cursor-pointer transition-colors duration-300 hover:text-blue-500 group "
+            onClick={() => navigate(`/ai-tutor`)}
+        >
+           <NavLink to={`/ai-tutor`} className={({ isActive }) => 
+              `flex items-center w-full ${isActive ? "text-blue-500" : "text-black hover:text-blue-500"}`
+            }>
+          <span className="mr-2 flex items-center justify-center w-6 h-6 ">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-bot group-hover:stroke-blue-500 transition-colors duration-300"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+          </span>
+         AI Tutor</NavLink>
         </li>
       </ul>
     </div>

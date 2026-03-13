@@ -41,7 +41,7 @@ const Adm_ScheduledTest = () => {
         setLoading(true);
         setError(null);
         let API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
-        const response = await axios.get(`${API_BASE_URL}/api/exams/scheduled?role=TPO`, {
+        const response = await axios.get(`${API_BASE_URL}/api/exams/scheduled?role=admin`, {
           withCredentials: true,
         });
 

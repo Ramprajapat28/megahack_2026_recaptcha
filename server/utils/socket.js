@@ -24,7 +24,7 @@ const initSocketHandlers = (io) => {
         return;
       }
 
-      let remainingTime = duration;
+      let remainingTime = duration*60;
 
       // ♻️ Resume if paused
       if (pausedSessions.has(sessionKey)) {

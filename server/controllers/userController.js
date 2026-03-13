@@ -294,83 +294,67 @@ const deleteUser = async (req, res) => {
 };
 
 const getAllPaginatedUsers = async (req, res) => {
+
   const user_id = req.user.id;
-  const user_role = req.user.role; // Get current user's role
-  const { page, limit, role, department } = req.query;
+  const user_role = req.user.role;
 
-  // Add year filter for TPO
-  const isTPO = user_role === 'TPO';
-  const yearFilter = isTPO ? 'BE' : null;
+  const { page = 1, limit = 10, role } = req.query;
 
-  const cacheKey = `users:${role || 'all'}:${department || 'all'}:${page || 'all'}:${limit || 'all'}:${yearFilter || 'none'}`;
+  const isAdmin = user_role === "admin";
 
   try {
 
-    const cached = await redis.get(cacheKey);
-    if (cached) {
-      // console.log('✅ Cache Hit for key:', cacheKey);
-      const parsed = JSON.parse(cached);
-      return res.status(200).json({
-        page: page ? parseInt(page) : undefined,
-        limit: limit ? parseInt(limit) : undefined,
-        User_Count: parsed.count,
-        users: parsed.data
-      });
-    } else {
-      // console.log('❌ Cache Miss for key:', cacheKey);
-    }
-
-    const numeberOfUsers = await userModel.getUserCount();
     let users;
+    let numberOfUsers;
 
-    if (!page && !limit && !department) {
-      users = await userModel.getAllStudents(role, yearFilter); // modified
-    } else {
-      if (!role) {
-        users = await userModel.getAllPaginatedUsers(
-          parseInt(page),
-          parseInt(limit),
-          yearFilter // added
-        );
-      } else if (role || department) {
-        users = await userModel.getDepartmentUsers(
-          role,
-          department,
-          yearFilter // added
-        );
-      } else {
-        users = await userModel.getAllPaginatedRoleUsers(
-          parseInt(page),
-          parseInt(limit),
-          role,
-          yearFilter // added
-        );
-      }
+    // ADMIN → pagination allowed
+    if (isAdmin) {
+
+      numberOfUsers = await userModel.getUserCount();
+
+      users = await userModel.getAllPaginatedUsers(
+        {role:'user'}
+      );
+
     }
 
-    const cacheTTL = parseInt(process.env.time) || 300;
+    // NON ADMIN → no pagination
+    else {
 
-    await redis.setex(cacheKey, cacheTTL, JSON.stringify({ data: users, count: numeberOfUsers }));
+      if (role === "admin") {
+        return res.status(403).json({
+          message: "You are not allowed to view admin users"
+        });
+      }
 
+      users = await userModel.getAllStudents();
+      numberOfUsers = users.length;
+
+    }
 
     await logActivity({
-      user_id: user_id,
-      activity: `Viewed users`,
-      status: 'success',
-      details: `Page: ${page || 'all'}, Limit: ${limit || 'all'}, Year filter: ${yearFilter || 'none'}`,
+      user_id,
+      activity: "Viewed users",
+      status: "success",
+      details: `Page: ${isAdmin ? page : "none"}, Limit: ${isAdmin ? limit : "none"}`
     });
 
     return res.status(200).json({
-      page: page ? parseInt(page) : undefined,
-      limit: limit ? parseInt(limit) : undefined,
-      User_Count: numeberOfUsers,
-      users,
+      page: isAdmin ? parseInt(page) : undefined,
+      limit: isAdmin ? parseInt(limit) : undefined,
+      User_Count: numberOfUsers,
+      users
     });
 
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: error.message });
   }
+
 };
+
+
+
 
 
 

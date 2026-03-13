@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
-import io from "socket.io-client";
+
 import {
   setSelectedOption,
   visitQuestion,
@@ -13,9 +13,10 @@ import {
 } from "../../../redux/questionSlice";
 import { clearExamId } from "../../../redux/ExamSlice";
 import { useLocation, useNavigate } from "react-router-dom";
+import VirtualCalculator from "./VirtualCalculator";
 
-const Question = () => {
-  const socketRef = useRef(null);
+const Question = ({ socketRef, remainingTime }) => {
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -31,14 +32,12 @@ const Question = () => {
   // Local state for multiple options, text answers, and socket timer
   const [multipleAnswers, setMultipleAnswers] = useState({});
   const [textAnswers, setTextAnswers] = useState({});
-  const [remainingTime, setRemainingTime] = useState(0);
-  const [timeUp, setTimeUp] = useState(false);
-  const [testSubmitted, setTestSubmitted] = useState(false);
 
   // Local state to track unsaved changes and prevent multiple requests
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [pendingResponse, setPendingResponse] = useState(null);
   const [isSaving, setIsSaving] = useState(false); // Prevent multiple save requests
+  const [isCalcOpen, setIsCalcOpen] = useState(false);
 
   const currentQuestion = questions[currentQuestionIndex] || null;
   const questionId = currentQuestion?.question_id;
@@ -52,72 +51,6 @@ const Question = () => {
       .toString()
       .padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
-
-  const submitFinalResponse = async () => {
-    const API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
-    const url = `${API_BASE_URL}/api/exams/responses/final/${examId}`;
-    await axios.put(url, {}, { withCredentials: true });
-  };
-
-  const handleSubmitTest = async () => {
-    setTestSubmitted(true);
-    await submitFinalResponse();
-    socketRef.current?.emit("submit_responses");
-    dispatch(clearExamId(examId));
-    dispatch(clearQuestions());
-    alert("Test submitted successfully!");
-    navigate("/home", { replace: true });
-  };
-
-  // Socket connection and timer management
-  useEffect(() => {
-    const socketConnect = async () => {
-      if (!socketRef.current) {
-        const API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
-        socketRef.current = io(`${API_BASE_URL}/exams/start-exam`, {
-          withCredentials: true,
-        });
-      }
-
-      const socket = socketRef.current;
-      socket.emit("start_exam", {
-        exam_id: examId,
-        duration: Duration * 60,
-      });
-
-      socket.on("already_active", ({ message }) => {
-        alert(message || "Already logged in for this exam.");
-        navigate("/home", { replace: true });
-      });
-
-      socket.on("timer_update", (data) => setRemainingTime(data.remainingTime));
-      socket.on("exam_ended", () => {
-        submitFinalResponse();
-        setTimeUp(true);
-      });
-
-      return () => {
-        if (socketRef.current) {
-          socketRef.current.off("connect");
-          socketRef.current.off("timer_update");
-          socketRef.current.off("exam_ended");
-          socketRef.current.disconnect();
-        }
-      };
-    };
-    socketConnect();
-
-    return () => {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-      }
-    };
-  }, [examId, Duration]);
-
-  // Handle time up
-  useEffect(() => {
-    if (timeUp) handleSubmitTest();
-  }, [timeUp]);
 
   // Initialize local state with existing answers (for when user returns after internet issues)
   useEffect(() => {
@@ -208,31 +141,7 @@ const Question = () => {
     await axios.put(url, payload, { withCredentials: true });
   };
 
-  const multipleResponse = async (options, id, question_type) => {
-    const API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
-    const url = `${API_BASE_URL}/api/exams/responses/${examId}`;
-    const payload = {
-      question_id: id,
-      selected_option: null,
-      selected_options: options,
-      text_answer: null,
-      question_type,
-    };
-    await axios.put(url, payload, { withCredentials: true });
-  };
 
-  const textResponse = async (text, id, question_type) => {
-    const API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
-    const url = `${API_BASE_URL}/api/exams/responses/${examId}`;
-    const payload = {
-      question_id: id,
-      selected_option: null,
-      selected_options: null,
-      text_answer: text,
-      question_type,
-    };
-    await axios.put(url, payload, { withCredentials: true });
-  };
 
   // Function to save pending response to backend with duplicate request prevention
   const savePendingResponse = async () => {
@@ -363,7 +272,10 @@ const Question = () => {
                   onChange={() => handleOptionSelect(key)}
                   className="w-5 h-5 text-blue-600 focus:ring-blue-500"
                 />
-                <span className="ml-3 text-gray-700 text-base">{value}</span>
+                <span className="ml-3 text-gray-700 text-base">
+                  {value}
+                </span>
+
               </label>
             ))}
           </div>
@@ -441,8 +353,22 @@ const Question = () => {
           ))}
         </div>
 
-        {/* Timer Display */}
-        <div className="flex justify-end mb-4">
+        {/* Timer Display & Calculator Button */}
+        <div className="flex justify-between items-center mb-4">
+          <button
+            onClick={() => setIsCalcOpen(!isCalcOpen)}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-md border text-sm font-semibold transition-colors
+              ${isCalcOpen 
+                ? 'bg-blue-100 border-blue-300 text-blue-700' 
+                : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+              }
+            `}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
+            Calculator
+          </button>
           <span className="font-sans text-center text-sm flex items-center border-2 p-1 border-blue-500 rounded-md">
             {formatTimeFromSeconds(remainingTime)}
           </span>
@@ -513,6 +439,11 @@ const Question = () => {
               {isSaving ? 'Saving...' : 'Save & Next'}
             </button>
           )}
+        </div>
+
+        {/* Global Virtual Calculator within Question container */}
+        <div className={isCalcOpen ? 'block' : 'hidden'}>
+          <VirtualCalculator onClose={() => setIsCalcOpen(false)} />
         </div>
       </div>
     </div>

@@ -30,7 +30,7 @@ const Adm_AddStudent = ({ closeModal, onStudentAdded }) => {
       phone: mobile,
       department: department,
       rollno: Number(rollno),
-      role: "Student",
+      role: "user",
       password: password,
       year: year,
     };
