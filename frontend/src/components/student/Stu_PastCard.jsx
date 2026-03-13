@@ -9,7 +9,7 @@ const Stu_PastCard = ({ test }) => {
   const [scheduledTime, setScheduledTime] = useState({ start: "", end: "" });
 
   const handlePublishClick = async (test) => {
-    const API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+    const API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
     try {
       // Navigate to the results page with exam_id in state
       navigate(`/student/results`, { state: { exam_id: test.exam_id } });
@@ -40,11 +40,11 @@ const Stu_PastCard = ({ test }) => {
   };
 
   return (
-    
-    <div className={`bg-white rounded-lg p-4 border flex flex-col border  ${test.isAttempted?'border-[#1AAB07]' : 'border-red-500' }`}>
+
+    <div className={`bg-white rounded-lg p-4 border flex flex-col border  ${test.isAttempted ? 'border-[#1AAB07]' : 'border-red-500'}`}>
       <div className="flex justify-between items-center mb-4">
-        
-        <span className={`flex items-center bg-white  border ${test.isAttempted ? 'border-[#1AAB07] text-[#1AAB07]' :'border-red-500 text-red-500' } opacity-90 text-sm px-2 py-1 rounded space-x-2`}>
+
+        <span className={`flex items-center bg-white  border ${test.isAttempted ? 'border-[#1AAB07] text-[#1AAB07]' : 'border-red-500 text-red-500'} opacity-90 text-sm px-2 py-1 rounded space-x-2`}>
           {/* SVG Icon */}
           <svg
             width="16"
@@ -118,7 +118,7 @@ const Stu_PastCard = ({ test }) => {
               />
             </g>
           </svg>
-         <h4>Number of Questions:  {test ? test.questions  : "Loading..."}</h4>
+          <h4>Number of Questions:  {test ? test.questions : "Loading..."}</h4>
         </p>
         <p className="font-bold flex items-center">
           <svg
@@ -165,7 +165,7 @@ const Stu_PastCard = ({ test }) => {
           </button>
         )}
       </div>
-      
+
       {/* Original commented code preserved */}
       {/* <div className="relative">
         {isScheduling && (

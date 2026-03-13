@@ -11,10 +11,10 @@ const Adm_CreateTestPage = () => {
   const [testName, setTestName] = useState("");
   const [duration, setDuration] = useState("");
   const [branch, setBranch] = useState([]);
-  const [year, setYear] = useState(["BE"]); 
+  const [year, setYear] = useState(["BE"]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showBranchDropdown, setShowBranchDropdown] = useState(false);
-  
+
   const [Loading, setLoading] = useState(false);
 
   const sidebarRef = useRef(null);
@@ -42,7 +42,7 @@ const Adm_CreateTestPage = () => {
     };
 
     try {
-      let API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+      let API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
       const response = await axios.post(`${API_BASE_URL}/api/exams`, payload, {
         withCredentials: true,
       });
@@ -105,9 +105,8 @@ const Adm_CreateTestPage = () => {
     <div className="min-h-screen flex">
       <div
         ref={sidebarRef}
-        className={`fixed top-0 left-0 h-full bg-gray-50 text-white z-50 transform ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } transition-transform duration-300 ease-in-out w-64 xl:static xl:translate-x-0`}
+        className={`fixed top-0 left-0 h-full bg-gray-50 text-white z-50 transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } transition-transform duration-300 ease-in-out w-64 xl:static xl:translate-x-0`}
       >
         <Adm_Sidebar />
       </div>
@@ -221,13 +220,13 @@ const Adm_CreateTestPage = () => {
                 </div>
               </div>
 
-            
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Year</label>
                 <div className="border border-gray-300 rounded-lg p-2 bg-gray-50">
-            
-                    BE
-                  
+
+                  BE
+
                 </div>
               </div>
             </div>

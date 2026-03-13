@@ -84,7 +84,7 @@ function Stu_Result() {
       }
 
       const currentExamId = exam_id;
-      const API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+      const API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
 
       const res = await axios.get(
         `${API_BASE_URL}/api/exams/results/correct-incorrect/${currentExamId}/${student_id}`,
@@ -305,27 +305,25 @@ function Stu_Result() {
           {/* Sidebar */}
           <div
             ref={sidebarRef}
-            className={`fixed top-0 left-0 h-full bg-white text-white z-50 transform ${
-              sidebarOpen
+            className={`fixed top-0 left-0 h-full bg-white text-white z-50 transform ${sidebarOpen
                 ? "translate-x-0"
                 : "-translate-x-full xl:translate-x-0"
-            } transition-transform duration-300 w-64 xl:block`}
+              } transition-transform duration-300 w-64 xl:block`}
           >
             <Stu_Sidebar />
           </div>
 
           {/* Overlay for mobile when sidebar is open */}
           {sidebarOpen && (
-            <div 
+            <div
               className="fixed inset-0 bg-black bg-opacity-50 z-40 xl:hidden"
               onClick={() => setSidebarOpen(false)}
             />
           )}
 
           {/* Main Content */}
-          <div className={`flex-1 h-screen px-4 md:px-8 py-6 bg-[#F5F6F8] transition-all duration-300 ${
-            sidebarOpen ? 'xl:ml-64' : 'xl:ml-64'
-          }`}>
+          <div className={`flex-1 h-screen px-4 md:px-8 py-6 bg-[#F5F6F8] transition-all duration-300 ${sidebarOpen ? 'xl:ml-64' : 'xl:ml-64'
+            }`}>
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 {/* Mobile sidebar toggle button */}
@@ -570,7 +568,7 @@ function Stu_Result() {
               userName={userName || "Student"}
               currentExamId={exam_id}
               student_id={student_id}
-              API_BASE_URL={process.env.REACT_APP_BACKEND_BASE_URL}
+              API_BASE_URL={import.meta.env.VITE_BACKEND_BASE_URL}
             />
           </div>
         </div>

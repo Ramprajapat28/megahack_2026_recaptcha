@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import axios from "axios";
 
-const Stu_TestCard = ({ testName, questionCount, duration, lastDate, examId, status,isEligible }) => {
+const Stu_TestCard = ({ testName, questionCount, duration, lastDate, examId, status, isEligible }) => {
   const [submit, setSubmit] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -22,7 +22,7 @@ const Stu_TestCard = ({ testName, questionCount, duration, lastDate, examId, sta
 
     const fetchResponseExamIds = async () => {
       try {
-        let API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+        let API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
         const response = await axios.get(
           `${API_BASE_URL}/api/exams/responses/user_id?status=submitted`,
           { withCredentials: true }
@@ -146,7 +146,7 @@ const Stu_TestCard = ({ testName, questionCount, duration, lastDate, examId, sta
 
       <button
         className={`font-semibold text-sm px-4 py-2 rounded-md shadow absolute bottom-3 right-3 
-    ${isEligibleToAttempt===false? "bg-gray-400 text-gray-700 cursor-not-allowed" : "bg-blue-700 text-white hover:bg-blue-800"}`}
+    ${isEligibleToAttempt === false ? "bg-gray-400 text-gray-700 cursor-not-allowed" : "bg-blue-700 text-white hover:bg-blue-800"}`}
         onClick={(e) => {
           handleChange(e);
         }}

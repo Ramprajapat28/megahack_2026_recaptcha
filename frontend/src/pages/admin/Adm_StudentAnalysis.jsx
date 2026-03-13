@@ -37,12 +37,12 @@ const Adm_StudentAnalysis = () => {
     const fetchStudents = async () => {
       try {
         setLoading(true);
-        const API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
-        
+        const API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
+
         const response = await axios.get(`${API_BASE_URL}/api/analysis/student-analysis?year=BE`, {
           withCredentials: true,
         });
-        
+
         if (response && response.data && response.data.results) {
           // Sort students by overall_rank in ascending order
           const sortedStudents = response.data.results.sort((a, b) => a.overall_rank - b.overall_rank);
@@ -56,7 +56,7 @@ const Adm_StudentAnalysis = () => {
         setLoading(false);
       }
     };
-    
+
     fetchStudents();
   }, []);
 
@@ -82,7 +82,7 @@ const Adm_StudentAnalysis = () => {
         const year = (student.year || "").toLowerCase();
         const overallRank = (student.overall_rank || "").toString();
         const departmentRank = (student.department_rank || "").toString();
-        
+
         return (
           studentId.includes(searchTerm) ||
           studentName.includes(searchLower) ||
@@ -112,10 +112,10 @@ const Adm_StudentAnalysis = () => {
     }
 
     setFilteredStudents(filtered);
-    
+
     const totalPages = Math.ceil(filtered.length / limit);
     setNumberofpages(Math.max(1, totalPages));
-    
+
     // Reset to page 1 if current page is beyond the new total pages
     if (page > totalPages && totalPages > 0) {
       setPage(1);
@@ -153,7 +153,7 @@ const Adm_StudentAnalysis = () => {
     setSelectedDepartment(department);
     setSelectedRank(rank);
     setPage(1); // Reset to first page
-    
+
     // Clear search term when applying filters to avoid confusion
     setSearchTerm("");
   };
@@ -184,13 +184,12 @@ const Adm_StudentAnalysis = () => {
       {/* Sidebar Section */}
       <div
         ref={sidebarRef}
-        className={`fixed top-0 left-0 h-full bg-gray-50 text-white z-50 transform ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } transition-transform duration-300 ease-in-out w-64 xl:static xl:translate-x-0`}
+        className={`fixed top-0 left-0 h-full bg-gray-50 text-white z-50 transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } transition-transform duration-300 ease-in-out w-64 xl:static xl:translate-x-0`}
       >
         <Adm_Sidebar />
       </div>
-      
+
       <div id="main-section" className="flex-grow bg-gray-100 h-max">
         <div className="bg-white h-14 border-b border-gray-300 items-end">
           <Adm_Navbar />
@@ -218,7 +217,7 @@ const Adm_StudentAnalysis = () => {
             </svg>
           </button>
         </div>
-        
+
         <div
           id="listSection"
           className="bg-white my-6 mx-10 pt-5 pb-5 pl-9 pr-9 rounded-lg border border-gray-300"
@@ -279,7 +278,7 @@ const Adm_StudentAnalysis = () => {
               </div>
             </div>
           </div>
-          
+
           {/* Filter Status Display */}
           {(selectedRank || selectedDepartment) && (
             <div className="mb-4 p-3 bg-blue-50 rounded-lg">
@@ -311,7 +310,7 @@ const Adm_StudentAnalysis = () => {
               </div>
             </div>
           )}
-          
+
           {loading ? (
             <div className="flex justify-center items-center py-20">
               <Loader />
@@ -324,7 +323,7 @@ const Adm_StudentAnalysis = () => {
                   <span> (filtered from {students.length} total)</span>
                 )}
               </div>
-              
+
               <table className="w-full">
                 <thead>
                   <tr className="border-b">
@@ -377,7 +376,7 @@ const Adm_StudentAnalysis = () => {
                   )}
                 </tbody>
               </table>
-              
+
               {filteredStudents.length > 0 && numberofpages > 1 && (
                 <div className="flex justify-center items-center mt-5">
                   <svg
@@ -400,9 +399,8 @@ const Adm_StudentAnalysis = () => {
                     {getPageNumbers().map((p) => (
                       <div
                         key={p}
-                        className={`w-8 h-8 flex items-center justify-center mx-1 cursor-pointer ${
-                          page === p ? "bg-blue-300 rounded-md" : "bg-white hover:bg-gray-100 rounded-md"
-                        }`}
+                        className={`w-8 h-8 flex items-center justify-center mx-1 cursor-pointer ${page === p ? "bg-blue-300 rounded-md" : "bg-white hover:bg-gray-100 rounded-md"
+                          }`}
                         onClick={() => setPage(p)}
                       >
                         {p}

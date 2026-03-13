@@ -35,7 +35,7 @@ function Adm_Analytics() {
     if (!data) {
       return false;
     }
-    
+
     // Check if there's meaningful data in any of the expected properties
     const hasData = (
       // Check for department_analysis array
@@ -45,7 +45,7 @@ function Adm_Analytics() {
       // Check for weak_scorers array
       (data.weak_scorers && Array.isArray(data.weak_scorers) && data.weak_scorers.length > 0)
     );
-    
+
     return hasData;
   };
 
@@ -54,10 +54,10 @@ function Adm_Analytics() {
     if (!apiData) {
       return null;
     }
-    
+
     // Get the department analysis data (first item in the array)
     const departmentData = apiData.department_analysis?.[0] || {};
-    
+
     // Create the aggregated data structure
     const aggregatedData = {
       accuracy_rate: departmentData.accuracy_rate || 0,
@@ -66,11 +66,11 @@ function Adm_Analytics() {
       bottom_performer: apiData.weak_scorers || [],
       participation_rate: 100, // Calculate based on student_count if needed
       performance_over_time: departmentData.performance_over_time || [],
-      dept_ranks: { 
-        department_rank: departmentData.department_rank || null 
+      dept_ranks: {
+        department_rank: departmentData.department_rank || null
       },
-      studentCount: { 
-        student_count: departmentData.student_count || 0 
+      studentCount: {
+        student_count: departmentData.student_count || 0
       }
     };
 
@@ -78,18 +78,18 @@ function Adm_Analytics() {
     if (departmentData.subject_performance && typeof departmentData.subject_performance === 'object') {
       aggregatedData.category_performance = Object.keys(departmentData.subject_performance).map(subject => {
         const subjectData = departmentData.subject_performance[subject];
-        
+
         // Handle different possible structures - STORE RAW VALUES
-        let score ;
-        let maxScore ;
-        
+        let score;
+        let maxScore;
+
         if (typeof subjectData === 'object' && subjectData !== null) {
           score = subjectData.score || subjectData.total_score || 0;
           maxScore = subjectData.max_score || 100;
         } else if (typeof subjectData === 'number') {
           score = subjectData;
         }
-        
+
         return {
           category: subject,
           raw_score: score, // Store actual raw score
@@ -131,7 +131,7 @@ function Adm_Analytics() {
         setHasData(false);
       }, 30000);
 
-      let API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+      let API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
       const response = await axios.get(
         `${API_BASE_URL}/api/analysis/department/${department}`,
         { withCredentials: true }
@@ -152,7 +152,7 @@ function Adm_Analytics() {
 
       // Process the response data
       const rawData = response.data;
-      
+
       // Check if meaningful data exists
       const dataExists = checkDataAvailability(rawData);
       if (!dataExists) {
@@ -164,14 +164,14 @@ function Adm_Analytics() {
 
       // Process the API response to match the expected format
       const processedData = processApiResponse(rawData);
-      
+
       if (!processedData) {
         setError(`No data available for ${department} department`);
         setIsLoading(false);
         setHasData(false);
         return;
       }
-      
+
       setHasData(true);
       setCategoryWiseData(processedData.category_performance || []);
       setTopPerformers(processedData.top_performer || []);
@@ -180,11 +180,11 @@ function Adm_Analytics() {
       setAccuracyData(processedData.accuracy_rate || 0);
       setPerformanceOverTime(processedData.performance_over_time || []);
       setDeptRank(processedData.dept_ranks || {});
-      
+
       if (processedData.dept_ranks?.department_rank) {
         superscript(setDSup, processedData.dept_ranks.department_rank);
       }
-      
+
       setStudentCount(processedData.studentCount?.student_count || 0);
       setError(null);
       setIsLoading(false);
@@ -199,7 +199,7 @@ function Adm_Analytics() {
       setIsLoading(false);
       setError(`Failed to fetch ${department} department analysis`);
       setHasData(false);
-      
+
       // Reset all data states on error
       setCategoryWiseData([]);
       setTopPerformers([]);
@@ -318,17 +318,17 @@ function Adm_Analytics() {
   const NoDataAvailable = () => (
     <div className="flex flex-col items-center justify-center h-96 bg-white rounded-lg shadow-lg mx-5 mt-5">
       <div className="text-center p-8">
-        <svg 
-          className="mx-auto h-24 w-24 text-gray-400 mb-4" 
-          fill="none" 
-          viewBox="0 0 24 24" 
+        <svg
+          className="mx-auto h-24 w-24 text-gray-400 mb-4"
+          fill="none"
+          viewBox="0 0 24 24"
           stroke="currentColor"
         >
-          <path 
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
-            strokeWidth={1.5} 
-            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" 
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.5}
+            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
           />
         </svg>
         <h3 className="text-2xl font-semibold text-gray-700 mb-2">
@@ -340,9 +340,9 @@ function Adm_Analytics() {
         <p className="text-gray-400 text-sm">
           Please check back later or contact your administrator if this issue persists.
         </p>
-        <button 
+        <button
           className="mt-6 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-          onClick={() => {fetchDepartmentData(selectedDepartment)}}
+          onClick={() => { fetchDepartmentData(selectedDepartment) }}
         >
           REFRESH
         </button>
@@ -392,8 +392,8 @@ function Adm_Analytics() {
               <button
                 key={dept}
                 className={`px-6 py-2 rounded-md font-semibold transition-all ${selectedDepartment === dept
-                    ? "bg-blue-600 text-white shadow-lg"
-                    : "bg-gray-300 text-gray-800"
+                  ? "bg-blue-600 text-white shadow-lg"
+                  : "bg-gray-300 text-gray-800"
                   }`}
                 onClick={() => handleDepartmentChange(dept)}
               >
@@ -418,11 +418,11 @@ function Adm_Analytics() {
           <div className="flex ">
             <div className="bg-white rounded-lg  h-screen">
               <Loader />
-             
+
             </div>
           </div>
         ) : !hasData && !error ? (
-          
+
           <NoDataAvailable />
         ) : hasData ? (
           // Show Analytics Dashboard UI only when data is available

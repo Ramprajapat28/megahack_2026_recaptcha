@@ -19,25 +19,25 @@ function Stu_Dashboard() {
   let examId = useSelector((state) => state.exam.examId);
 
   const [tests, setTests] = useState([]);
-  
+
   // Get initial filter state from sessionStorage or default to "all"
   const [filter, setFilter] = useState(() => {
     const savedFilter = sessionStorage.getItem('dashboard_filter');
     return savedFilter || "all";
   });
-  
+
   // Get initial sort state from sessionStorage or default to "ALL"
   const [sort, setSort] = useState(() => {
     const savedSort = sessionStorage.getItem('dashboard_sort');
     return savedSort || "ALL";
   });
-  
+
   // Get initial date states from sessionStorage
   const [startDate, setStartDate] = useState(() => {
     const savedStartDate = sessionStorage.getItem('dashboard_startDate');
     return savedStartDate ? new Date(savedStartDate) : null;
   });
-  
+
   const [endDate, setEndDate] = useState(() => {
     const savedEndDate = sessionStorage.getItem('dashboard_endDate');
     return savedEndDate ? new Date(savedEndDate) : new Date();
@@ -52,12 +52,12 @@ function Stu_Dashboard() {
   const detailsRef = useRef(null);
   const calendarRef = useRef(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  
+
   // Combined loading states
   const [loading, setLoading] = useState(true);
   const [testsLoading, setTestsLoading] = useState(true);
   const [analyticsLoading, setAnalyticsLoading] = useState(true);
-  
+
   const [error, setError] = useState(null);
   const [analyticsError, setAnalyticsError] = useState(null);
   const sidebarRef = useRef(null);
@@ -121,7 +121,7 @@ function Stu_Dashboard() {
     setAnalyticsError(null);
 
     try {
-      let API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+      let API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
       const response = await axios.get(
         `${API_BASE_URL}/api/exams/results/testAnalysis/student/${userData.id}`,
         {
@@ -214,7 +214,7 @@ function Stu_Dashboard() {
   const fetchTests = async (filterType) => {
     setTestsLoading(true);
 
-    let API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+    let API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
     let payload;
 
     if (filterType === "all") {
@@ -247,7 +247,7 @@ function Stu_Dashboard() {
         target_years: [userData.year],
       };
       try {
-        let API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+        let API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
         const response = await axios.get(
           `${API_BASE_URL}/api/exams/results/student/${userData.id}`,
           {
@@ -263,7 +263,7 @@ function Stu_Dashboard() {
     }
 
     try {
-      let API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+      let API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
       const pastPaper = await axios.get(
         `${API_BASE_URL}/api/exams/results/student/${userData.id}`,
         {
@@ -335,7 +335,7 @@ function Stu_Dashboard() {
   const handleOnline = async () => {
     try {
       alert("You are online!");
-      let API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+      let API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
       const response = await axios.post(`${API_BASE_URL}/api/users/logout`, {
         withCredentials: true,
       });
@@ -358,7 +358,7 @@ function Stu_Dashboard() {
   const handleFilterChange = (e) => {
     const newFilter = e.target.value;
     setFilter(newFilter);
-    
+
     // Reset date filters when switching between live and past
     if (newFilter === "all") {
       setStartDate(null);
@@ -414,9 +414,8 @@ function Stu_Dashboard() {
         {/* Sidebar */}
         <div
           ref={sidebarRef}
-          className={`fixed top-0 left-0 h-full bg-gray-50 text-white z-50 transform ${
-            sidebarOpen ? "translate-x-0" : "-translate-x-full xl:translate-x-0"
-          } transition-transform duration-300 w-64 xl:block`}
+          className={`fixed top-0 left-0 h-full bg-gray-50 text-white z-50 transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full xl:translate-x-0"
+            } transition-transform duration-300 w-64 xl:block`}
         >
           <Stu_Sidebar />
         </div>
@@ -478,9 +477,8 @@ function Stu_Dashboard() {
       {/* Sidebar */}
       <div
         ref={sidebarRef}
-        className={`fixed top-0 left-0 h-full bg-gray-50 text-white z-50 transform ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full xl:translate-x-0"
-        } transition-transform duration-300 w-64 xl:block`}
+        className={`fixed top-0 left-0 h-full bg-gray-50 text-white z-50 transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full xl:translate-x-0"
+          } transition-transform duration-300 w-64 xl:block`}
       >
         <Stu_Sidebar />
       </div>

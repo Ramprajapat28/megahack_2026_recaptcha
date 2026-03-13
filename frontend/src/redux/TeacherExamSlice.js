@@ -11,7 +11,7 @@ const FetchTeacherExam = createAsyncThunk(
   "fetch/teacherExams",
   async (data, { rejectWithValue }) => {
     try {
-      const API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+      const API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
       const response = await axios.get(
         `${API_BASE_URL}/api/exams/teacher-results/correct-incorrect/${data.exam_id}/${data.teacher_id}`,
         { withCredentials: true }

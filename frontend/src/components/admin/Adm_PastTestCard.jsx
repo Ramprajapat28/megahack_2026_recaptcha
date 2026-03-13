@@ -16,7 +16,7 @@ const Adm_PastTestCard = ({ test, onClick }) => {
       // Log the ID
       // console.log("Clicked test ID:", test.exam_id);
       // console.log("Clicked test duration:");
-      const API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+      const API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
       const response = await axios.get(
         `${API_BASE_URL}/api/exams/results/all/${test.exam_id}?page=1&limit=3`,
         { withCredentials: true }

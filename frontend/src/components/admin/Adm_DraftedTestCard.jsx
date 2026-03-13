@@ -45,7 +45,7 @@ const Adm_DraftedTestCard = ({ test }) => {
 
       navigate("/admin/input", { replace: true });
 
-      // const API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+      // const API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
       // await axios.put(
       //   `${API_BASE_URL}/api/exams/live-exam/${examId}`,
       //   {},
@@ -64,7 +64,7 @@ const Adm_DraftedTestCard = ({ test }) => {
     setRequestInProgress(true); // Set request state to true
 
     try {
-      const API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+      const API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
       await axios.put(
         `${API_BASE_URL}/api/exams/publish/${examId}`,
         {

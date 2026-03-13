@@ -21,7 +21,7 @@ const Question = () => {
   const location = useLocation();
   const Duration = location.state?.Duration;
   const examId = location.state?.examId;
-  
+
   // Redux state
   const exam = useSelector((state) => state.exam.exam);
   const userEmail = useSelector((state) => state.user.user.email);
@@ -54,7 +54,7 @@ const Question = () => {
   };
 
   const submitFinalResponse = async () => {
-    const API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+    const API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
     const url = `${API_BASE_URL}/api/exams/responses/final/${examId}`;
     await axios.put(url, {}, { withCredentials: true });
   };
@@ -73,7 +73,7 @@ const Question = () => {
   useEffect(() => {
     const socketConnect = async () => {
       if (!socketRef.current) {
-        const API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+        const API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
         socketRef.current = io(`${API_BASE_URL}/exams/start-exam`, {
           withCredentials: true,
         });
@@ -84,11 +84,11 @@ const Question = () => {
         exam_id: examId,
         duration: Duration * 60,
       });
-      
-socket.on("already_active", ({ message }) => {
-    alert(message || "Already logged in for this exam.");
-    navigate("/home", { replace: true });
-  });
+
+      socket.on("already_active", ({ message }) => {
+        alert(message || "Already logged in for this exam.");
+        navigate("/home", { replace: true });
+      });
 
       socket.on("timer_update", (data) => setRemainingTime(data.remainingTime));
       socket.on("exam_ended", () => {
@@ -124,7 +124,7 @@ socket.on("already_active", ({ message }) => {
     const initializeAnswers = () => {
       const multipleAnswersInit = {};
       const textAnswersInit = {};
-      
+
       questions.forEach((question, index) => {
         if (question.question_type === 'multiple_choice' && question.selectedOptions) {
           multipleAnswersInit[question.question_id] = question.selectedOptions;
@@ -133,11 +133,11 @@ socket.on("already_active", ({ message }) => {
           textAnswersInit[question.question_id] = question.textAnswer;
         }
       });
-      
+
       setMultipleAnswers(multipleAnswersInit);
       setTextAnswers(textAnswersInit);
     };
-    
+
     if (questions.length > 0) {
       initializeAnswers();
     }
@@ -196,7 +196,7 @@ socket.on("already_active", ({ message }) => {
   };
 
   const singleResponse = async (option, id, question_type) => {
-    const API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+    const API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
     const url = `${API_BASE_URL}/api/exams/responses/${examId}`;
     const payload = {
       question_id: id,
@@ -209,7 +209,7 @@ socket.on("already_active", ({ message }) => {
   };
 
   const multipleResponse = async (options, id, question_type) => {
-    const API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+    const API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
     const url = `${API_BASE_URL}/api/exams/responses/${examId}`;
     const payload = {
       question_id: id,
@@ -222,7 +222,7 @@ socket.on("already_active", ({ message }) => {
   };
 
   const textResponse = async (text, id, question_type) => {
-    const API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+    const API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
     const url = `${API_BASE_URL}/api/exams/responses/${examId}`;
     const payload = {
       question_id: id,
@@ -239,25 +239,25 @@ socket.on("already_active", ({ message }) => {
     if (!pendingResponse || isSaving) return;
 
     setIsSaving(true); // Prevent multiple simultaneous requests
-    
+
     try {
       const { type, data } = pendingResponse;
-      
+
       switch (type) {
         case 'single':
-         
+
           dispatch(setSelectedOption({ index: currentQuestionIndex, option: data.option, answered: true, cleared: false }));
           break;
         case 'multiple':
-          
+
           dispatch(setMultipleSelectedOption({ index: currentQuestionIndex, options: data.options, answered: true, cleared: false }));
           break;
         case 'text':
-          
+
           dispatch(setTextAnswer({ index: currentQuestionIndex, text: data.text, answered: true, cleared: false }));
           break;
       }
-      
+
       setHasUnsavedChanges(false);
       setPendingResponse(null);
     } catch (error) {
@@ -270,12 +270,12 @@ socket.on("already_active", ({ message }) => {
   const handleNextQuestion = async () => {
     // Prevent multiple clicks while saving
     if (isSaving) return;
-    
+
     // Save current response before moving to next question
     if (hasUnsavedChanges && pendingResponse) {
       await savePendingResponse();
     }
-    
+
     if (currentQuestionIndex < questions.length - 1) {
       dispatch(visitQuestion(currentQuestionIndex + 1));
     }
@@ -284,7 +284,7 @@ socket.on("already_active", ({ message }) => {
   const handleSaveCurrentQuestion = async () => {
     // Prevent multiple clicks while saving
     if (isSaving) return;
-    
+
     // Save current response without moving to next question (for last question)
     if (hasUnsavedChanges && pendingResponse) {
       await savePendingResponse();
@@ -304,7 +304,7 @@ socket.on("already_active", ({ message }) => {
 
 
     try {
-     
+
 
       if (currentQuestion?.question_type === "single_choice") {
         dispatch(setSelectedOption({ index: currentQuestionIndex, option: null, answered: false, cleared: true }));
@@ -340,7 +340,7 @@ socket.on("already_active", ({ message }) => {
     const questionType = currentQuestion?.question_type;
     const options = currentQuestion?.options || {};
     const selectedOption = currentQuestion?.selectedOption;
-    
+
     // Use local state for multiple choice and text answers to ensure persistence
     const questionId = currentQuestion?.question_id;
     const selectedOptions = multipleAnswers[questionId] || currentQuestion?.selectedOptions || [];
@@ -492,13 +492,12 @@ socket.on("already_active", ({ message }) => {
               {currentQuestion?.markedForReview ? "Unmark Review" : "Mark for Review"}
             </button>
           </div>
-          
+
           {/* Conditional button based on whether it's the last question */}
           {isLastQuestion ? (
             <button
-              className={`px-4 py-2 text-white rounded-lg ${
-                isSaving ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'
-              }`}
+              className={`px-4 py-2 text-white rounded-lg ${isSaving ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'
+                }`}
               onClick={handleSaveCurrentQuestion}
               disabled={isSaving}
             >
@@ -506,9 +505,8 @@ socket.on("already_active", ({ message }) => {
             </button>
           ) : (
             <button
-              className={`px-4 py-2 text-white rounded-lg ${
-                isSaving ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'
-              }`}
+              className={`px-4 py-2 text-white rounded-lg ${isSaving ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'
+                }`}
               onClick={handleNextQuestion}
               disabled={isSaving}
             >

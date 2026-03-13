@@ -24,7 +24,7 @@ const NavbarDetails = () => {
   const dispatch = useDispatch();
 
   const handleLogout = async () => {
-    let API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+    let API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
     const response = await axios.post(`${API_BASE_URL}/api/users/logout`, {
       withCredentials: true, // Make sure the cookie is sent with the request
     });

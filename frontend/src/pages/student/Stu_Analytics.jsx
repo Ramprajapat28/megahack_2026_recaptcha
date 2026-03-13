@@ -29,10 +29,10 @@ function Stu_Analytics() {
   const [categoryData, setCategoryData] = useState(null);
   const [hasData, setHasData] = useState(false); // New state to track if any data exists
   const [apiError, setApiError] = useState(null); // Track API errors
-  
+
   // Get user data from Redux store
   const user = useSelector((state) => state.user.user);
-  
+
   // Use user's actual department and year from profile
   const [selectedDepartment, setSelectedDepartment] = useState(user?.department);
   const [selectedYear, setSelectedYear] = useState(user?.year);
@@ -86,12 +86,12 @@ function Stu_Analytics() {
 
   // Dynamic URL building function
   const buildApiUrl = (userId, departmentName, year) => {
-    const API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+    const API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
     const params = new URLSearchParams({
       department_name: departmentName,
       year: year
     });
-    
+
     return `${API_BASE_URL}/api/analysis/student-analysis/${userId}?${params.toString()}`;
   };
 
@@ -100,54 +100,54 @@ function Stu_Analytics() {
       setLoading(true);
       setApiError(null);
       setHasData(false);
-      
+
       // Build the dynamic URL using actual user data
       const url = buildApiUrl(user_id, selectedDepartment, selectedYear);
       console.log("API URL:", url);
-      
+
       const response = await axios.get(url, {
         withCredentials: true,
         headers: { "x-user-id": user_id },
       });
-      
+
       console.log("Full API Response:", response.data);
-      
+
       // Access the results from the response
       const apiData = response.data.results || response.data;
-      
+
       if (apiData && Object.keys(apiData).length > 0) {
         let dataFound = false;
-        
+
         // Set basic data
         if (apiData.overall_results && apiData.overall_results.length > 0) {
           setData(apiData.overall_results);
           dataFound = true;
         }
-        
+
         if (apiData.avg_results && apiData.avg_results.length > 0) {
           setAvgData(apiData.avg_results);
           dataFound = true;
         }
-        
+
         // Extract and set category data
         if (apiData.category && Object.keys(apiData.category).length > 0) {
           setCategoryData(apiData.category);
           console.log("Category data:", apiData.category);
           dataFound = true;
         }
-        
+
         // Set rank data
         const rankInfo = {
           department_rank: apiData.department_rank || 0,
           overall_rank: apiData.overall_rank || 0
         };
         setRankData(rankInfo);
-        
+
         // If we have valid ranks, consider it as data
         if (apiData.department_rank > 0 || apiData.overall_rank > 0) {
           dataFound = true;
         }
-        
+
         // Set superscripts for ranks
         if (apiData.department_rank) {
           superscript(setDSup, apiData.department_rank);
@@ -155,34 +155,34 @@ function Stu_Analytics() {
         if (apiData.overall_rank) {
           superscript(setOSup, apiData.overall_rank);
         }
-        
+
         // Set username if available (fallback to user from Redux)
         if (apiData.name) {
           setUserName(apiData.name);
         } else if (user?.name) {
           setUserName(user.name);
         }
-        
+
         // Handle performance over time data
         if (apiData.performance_over_time && Array.isArray(apiData.performance_over_time)) {
           console.log("Raw performance_over_time data:", apiData.performance_over_time);
-          
+
           const validPerformanceData = apiData.performance_over_time
             .filter(item => {
-              return item && 
-                     typeof item === 'object' && 
-                     Object.keys(item).length > 0 && 
-                     item.hasOwnProperty('score') && 
-                     item.hasOwnProperty('max_score') &&
-                     item.hasOwnProperty('exam_id');
+              return item &&
+                typeof item === 'object' &&
+                Object.keys(item).length > 0 &&
+                item.hasOwnProperty('score') &&
+                item.hasOwnProperty('max_score') &&
+                item.hasOwnProperty('exam_id');
             })
             .map((item, index) => {
               const score = item.score || 0;
               const maxScore = item.max_score || 1;
               const percentage = maxScore > 0 ? Math.round((score / maxScore) * 100) : 0;
-              
+
               const examName = item.exam_name || `Exam ${item.exam_id}`;
-              
+
               return {
                 name: examName,
                 value: percentage,
@@ -193,10 +193,10 @@ function Stu_Analytics() {
               };
             })
             .sort((a, b) => a.exam_id - b.exam_id);
-          
+
           console.log("Processed performance data:", validPerformanceData);
           setPerformanceOverTime(validPerformanceData);
-          
+
           if (validPerformanceData.length > 0) {
             dataFound = true;
           }
@@ -204,13 +204,13 @@ function Stu_Analytics() {
           console.log("No valid performance_over_time data found");
           setPerformanceOverTime([]);
         }
-        
+
         // Calculate test completion data
         if (apiData.completion_rate !== undefined && apiData.completion_rate !== null) {
           const completionRate = apiData.completion_rate || 0;
           const attempted = Math.round(completionRate * 100);
           const remaining = 100 - attempted;
-          
+
           setTestCompletionData({
             title: "Test Completion Rate",
             chartData: [
@@ -220,7 +220,7 @@ function Stu_Analytics() {
           });
           dataFound = true;
         }
-        
+
         // Set correct and total scores
         if (apiData.total_score !== undefined || apiData.max_score !== undefined) {
           setCorrect(apiData.total_score || 0);
@@ -229,19 +229,19 @@ function Stu_Analytics() {
             dataFound = true;
           }
         }
-        
+
         // Update hasData state
         setHasData(dataFound);
-        
+
         if (!dataFound) {
           console.log("No meaningful data found in API response");
         }
-        
+
       } else {
         console.warn("No data received from API or empty response");
         setHasData(false);
       }
-      
+
       setLoading(false);
       setTimeout(() => setChartReady(true), 100);
     } catch (error) {
@@ -280,7 +280,7 @@ function Stu_Analytics() {
   };
 
   // Calculate average score for reference line
-  const averageScore = performanceOverTime.length > 0 
+  const averageScore = performanceOverTime.length > 0
     ? Math.round(performanceOverTime.reduce((sum, item) => sum + item.value, 0) / performanceOverTime.length)
     : 0;
 
@@ -306,16 +306,16 @@ function Stu_Analytics() {
     title: "Topic-wise Performance",
     chartData: (() => {
       if (!categoryData || typeof categoryData !== 'object') return [];
-      
+
       const result = [];
-      
+
       Object.entries(categoryData).forEach(([categoryName, categoryDetails]) => {
-        if (typeof categoryDetails === 'object' && categoryDetails !== null && 
-            categoryDetails.hasOwnProperty('score') && categoryDetails.hasOwnProperty('max_score')) {
-          
+        if (typeof categoryDetails === 'object' && categoryDetails !== null &&
+          categoryDetails.hasOwnProperty('score') && categoryDetails.hasOwnProperty('max_score')) {
+
           const displayName = categoryName.replace(/_/g, ' ')
             .replace(/\b\w/g, l => l.toUpperCase());
-          
+
           result.push({
             name: displayName,
             yourScore: categoryDetails.score || 0,
@@ -323,7 +323,7 @@ function Stu_Analytics() {
           });
         }
       });
-      
+
       return result;
     })(),
     colors: {
@@ -338,24 +338,24 @@ function Stu_Analytics() {
     <div className="flex items-center justify-center h-96">
       <div className="text-center max-w-md mx-auto">
         <div className="mb-6">
-          <svg 
-            className="w-24 h-24 mx-auto text-gray-300 mb-4" 
-            fill="none" 
-            stroke="currentColor" 
+          <svg
+            className="w-24 h-24 mx-auto text-gray-300 mb-4"
+            fill="none"
+            stroke="currentColor"
             viewBox="0 0 24 24"
           >
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth={1} 
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1}
               d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
             />
           </svg>
         </div>
         <h3 className="text-xl font-semibold text-gray-700 mb-2">No Analytics Data Available</h3>
         <p className="text-gray-500 text-sm mb-4">
-          {apiError 
-            ? `Error: ${apiError}` 
+          {apiError
+            ? `Error: ${apiError}`
             : "We couldn't find any analytics data for your current selection."
           }
         </p>
@@ -364,7 +364,7 @@ function Stu_Analytics() {
           <p>• Check if your department and year are correct</p>
           <p>• Try refreshing the page</p>
         </div>
-        <button 
+        <button
           onClick={fetchAllData}
           className="mt-6 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm"
         >
@@ -378,9 +378,8 @@ function Stu_Analytics() {
     <div className="min-h-screen flex bg-gray-100 mb-4 overflow-x-hidden">
       <div
         ref={sidebarRef}
-        className={`fixed top-0 left-0 h-full bg-gray-50 text-white z-50 transform ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full xl:translate-x-0"
-        } transition-transform duration-300 w-64 xl:block shadow-lg`}
+        className={`fixed top-0 left-0 h-full bg-gray-50 text-white z-50 transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full xl:translate-x-0"
+          } transition-transform duration-300 w-64 xl:block shadow-lg`}
       >
         <Stu_Sidebar />
       </div>

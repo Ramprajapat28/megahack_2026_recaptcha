@@ -84,7 +84,7 @@ const Adm_Dashboard = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+        const API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
         const [studentsRes, testsRes, lastTestRes] = await Promise.all([
           axios.get(`${API_BASE_URL}/api/stats/all-students?exam_for=Student`, {
             withCredentials: true,
@@ -101,14 +101,14 @@ const Adm_Dashboard = () => {
         const liveTestsCount = testsRes.data.liveTestsCount;
         const scheduledTestsCount = testsRes.data.scheduledTestsCount;
         const pastTestsCount = testsRes.data.pastTestsCount;
-       
+
 
         setTileData([
           { label: "Live Tests", value: liveTestsCount },
           { label: "Scheduled Tests", value: scheduledTestsCount },
           { label: "Active Students", value: studentsCount },
           { label: "Past Tests", value: pastTestsCount },
-          
+
         ]);
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
@@ -118,7 +118,7 @@ const Adm_Dashboard = () => {
     const fetchAllTestsData = async () => {
       setLoading(true);
       try {
-        const API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+        const API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
         await Promise.all([
           fetchTestsData(`${API_BASE_URL}/api/exams/drafts?role=TPO`, "drafted"),
           fetchTestsData(`${API_BASE_URL}/api/exams/scheduled?role=TPO`, "scheduled"),
@@ -158,7 +158,7 @@ const Adm_Dashboard = () => {
     navigate("/admin/mcq-generator"); // Update this path to match your route
   };
 
- 
+
   const openDetails = () => setIsDetailsOpen(true);
   const closeDetails = () => setIsDetailsOpen(false);
 
@@ -195,9 +195,8 @@ const Adm_Dashboard = () => {
     <div className="min-h-screen flex">
       <div
         ref={sidebarRef}
-        className={`fixed top-0 left-0 h-full bg-gray-100 text-white z-50 transform ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } transition-transform duration-300 ease-in-out w-64 xl:static xl:translate-x-0`}
+        className={`fixed top-0 left-0 h-full bg-gray-100 text-white z-50 transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } transition-transform duration-300 ease-in-out w-64 xl:static xl:translate-x-0`}
       >
         <Adm_Sidebar testsData={testsData} />
       </div>
@@ -241,9 +240,8 @@ const Adm_Dashboard = () => {
             {["live", "drafted", "scheduled", "past"].map((tab) => (
               <button
                 key={tab}
-                className={`text-lg font-semibold ${
-                  activeTab === tab ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-600"
-                }`}
+                className={`text-lg font-semibold ${activeTab === tab ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-600"
+                  }`}
                 onClick={() => {
                   setActiveTab(tab);
                   setCurrentPage(1);
@@ -285,9 +283,8 @@ const Adm_Dashboard = () => {
             <div className="flex justify-center items-center mt-6">
               <button
                 onClick={() => handlePageChange(currentPage - 1)}
-                className={`p-2 mx-1 rounded ${
-                  currentPage === 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200"
-                }`}
+                className={`p-2 mx-1 rounded ${currentPage === 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200"
+                  }`}
                 disabled={currentPage === 1}
               >
                 &lt;
@@ -296,18 +293,16 @@ const Adm_Dashboard = () => {
                 <button
                   key={i + 1}
                   onClick={() => handlePageChange(i + 1)}
-                  className={`px-3 py-1 mx-1 rounded ${
-                    currentPage === i + 1 ? "bg-blue-500 text-white" : "hover:bg-gray-200"
-                  }`}
+                  className={`px-3 py-1 mx-1 rounded ${currentPage === i + 1 ? "bg-blue-500 text-white" : "hover:bg-gray-200"
+                    }`}
                 >
                   {i + 1}
                 </button>
               ))}
               <button
                 onClick={() => handlePageChange(currentPage + 1)}
-                className={`p-2 mx-1 rounded ${
-                  currentPage === totalPages ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200"
-                }`}
+                className={`p-2 mx-1 rounded ${currentPage === totalPages ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200"
+                  }`}
                 disabled={currentPage === totalPages}
               >
                 &gt;
@@ -323,20 +318,20 @@ const Adm_Dashboard = () => {
           title="MCQ Generator"
         >
           {/* Chat/Message Circle Icon */}
-          <svg 
-            className="w-6 h-6" 
-            fill="none" 
-            stroke="currentColor" 
-            strokeWidth={2} 
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
             viewBox="0 0 24 24"
           >
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" 
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
             />
           </svg>
-          
+
           {/* Tooltip */}
           <div className="absolute bottom-16 right-0 bg-gray-800 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
             MCQ Generator

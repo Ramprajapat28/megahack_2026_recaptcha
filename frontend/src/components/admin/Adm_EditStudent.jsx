@@ -2,15 +2,15 @@ import React, { useState, useRef } from "react";
 import axios from "axios";
 // const API_BASE_URL = process.env.BACKEND_BASE_URL;
 
-const Adm_EditStudent = ({ closeEditModal, student, counter ,onStudentUpdated, onStudentDeleted }) => {
-  
+const Adm_EditStudent = ({ closeEditModal, student, counter, onStudentUpdated, onStudentDeleted }) => {
+
   const studentname = student.name.split(" ")[0];
 
 
   const user_id = student.user_id;
 
   const [studentName, setStudentName] = useState(student.name);
-  
+
   const [email, setEmail] = useState(student.email);
   const [mobile, setMobile] = useState(student.phone);
   const [department, setDepartment] = useState(student.department);
@@ -36,7 +36,7 @@ const Adm_EditStudent = ({ closeEditModal, student, counter ,onStudentUpdated, o
     };
 
     try {
-      const API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+      const API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
       await axios.put(`${API_BASE_URL}/api/users/update/${student.user_id}`, newStudent, {
         withCredentials: true, // Make sure the cookie is sent with the request
       });
@@ -62,7 +62,7 @@ const Adm_EditStudent = ({ closeEditModal, student, counter ,onStudentUpdated, o
     setLoading(true);
 
     try {
-      const API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+      const API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
       await axios.delete(`${API_BASE_URL}/api/users/delete/${student.user_id}`, {
         withCredentials: true, // Make sure the cookie is sent with the request
       });
@@ -89,7 +89,7 @@ const Adm_EditStudent = ({ closeEditModal, student, counter ,onStudentUpdated, o
     setLoading(true);
 
     try {
-      const API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+      const API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
       await axios.post(
         `${API_BASE_URL}/api/users/send-reset-mail`,
         { student },
@@ -122,7 +122,7 @@ const Adm_EditStudent = ({ closeEditModal, student, counter ,onStudentUpdated, o
             value={studentName}
             onChange={(e) => setStudentName(e.target.value)}
           />
-          
+
         </div>
       </div>
 
@@ -182,7 +182,7 @@ const Adm_EditStudent = ({ closeEditModal, student, counter ,onStudentUpdated, o
       <div id="ClassBoxes" className="mb-7">
         <h1 className="mb-2">Roll Number</h1>
         <div className="flex space-x-4">
-          
+
           <input
             className="h-10 w-48px border border-gray-300 rounded-lg pl-2"
             placeholder="Roll Number"

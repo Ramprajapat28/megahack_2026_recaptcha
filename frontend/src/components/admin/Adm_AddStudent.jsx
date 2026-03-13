@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-const Adm_AddStudent = ({ closeModal ,onStudentAdded }) => {
-  var API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+const Adm_AddStudent = ({ closeModal, onStudentAdded }) => {
+  var API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
   const [studentName, setStudentName] = useState("");
 
   const [email, setEmail] = useState("");
@@ -10,7 +10,7 @@ const Adm_AddStudent = ({ closeModal ,onStudentAdded }) => {
   const [department, setDepartment] = useState("INFT");
   const [year, setYear] = useState("FE");
   const [rollno, setRollno] = useState();
- 
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Generate a random password
@@ -36,15 +36,15 @@ const Adm_AddStudent = ({ closeModal ,onStudentAdded }) => {
     };
 
     try {
-     const response = await axios.post(`${API_BASE_URL}/api/users/register`, newStudent, { withCredentials: true });
+      const response = await axios.post(`${API_BASE_URL}/api/users/register`, newStudent, { withCredentials: true });
       alert("Student registered successfully!");
-       // Call the callback function to update parent component's state
+      // Call the callback function to update parent component's state
       if (onStudentAdded) {
         onStudentAdded(response.data || newStudent);
       }// Reload the page to reflect changes
       closeModal();
     } catch (error) {
-     
+
       const errorMsg =
         error?.response?.data?.error ||
         error?.response?.data?.errors?.[0]?.msg ||

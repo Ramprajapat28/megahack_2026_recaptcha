@@ -6,7 +6,7 @@ const Token = () => {
   const user = useSelector((state) => state.user);
   useEffect(() => {
     const handleTokenRefresh = async () => {
-      let API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+      let API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
       try {
         const response = await axios.post(
           `${API_BASE_URL}/api/token`,

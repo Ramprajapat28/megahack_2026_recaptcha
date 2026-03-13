@@ -4,8 +4,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { setUser } from "../redux/userSlice";
 import doodle from "../assets/sidebar/doodle.svg";
-import csi from "../assets/csi.svg";
-import ace from "../assets/ace.svg";
+
 import { Eye, EyeClosed } from "lucide-react";
 
 const Login = () => {
@@ -27,8 +26,8 @@ const Login = () => {
   }, []);
 
   const encryptPassword = async (password) => {
-    const SECRET_KEY = process.env.REACT_APP_KEY.slice(0, 32); // 32 bytes
-    const IV = process.env.REACT_APP_IV.slice(0, 16); // 16 bytes
+    const SECRET_KEY = import.meta.env.VITE_KEY.slice(0, 32); // 32 bytes
+    const IV = import.meta.env.VITE_IV.slice(0, 16); // 16 bytes
 
     const encoder = new TextEncoder();
     const encodedPassword = encoder.encode(password);
@@ -62,34 +61,18 @@ const Login = () => {
     setLoading(true);
 
     try {
-      // MOCK LOGIN TEMPORARILY SINCE BACKEND IS NOT RUNNING
-      setTimeout(() => {
-        const mockRole = email.includes("admin") ? "TPO" : "Student";
-        const userData = { email, role: mockRole, status: "ACTIVE" };
-        dispatch(setUser(userData));
-
-        if (mockRole === "Student") {
-          navigate("/home", { replace: true });
-        } else {
-          navigate("/admin", { replace: true });
-        }
-
-        setLoading(false);
-      }, 500);
-
-      /*
-      const encryptedPassword = await encryptPassword(password);
-      let API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+      const API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL || "http://localhost:4000";
 
       const response = await axios.post(
         `${API_BASE_URL}/api/users/login`,
         {
           email,
-          password: encryptedPassword,
+          password,
         },
         {
           withCredentials: true,
           headers: {
+            "Content-Type": "application/json",
             "X-Screen-Width": window.screen.width,
           },
         }
@@ -100,13 +83,15 @@ const Login = () => {
         dispatch(setUser(userData));
 
         if (userData.status === "NOTACTIVE") {
-          navigate(`/reset-password/${response.headers.resettoken}`);
+          navigate(`/reset-password/${response.headers?.resettoken}`);
         } else if (userData.status === "ACTIVE") {
           switch (userData.role) {
             case "Student":
+            case "user":
               navigate("/home", { replace: true });
               break;
             case "TPO":
+            case "admin":
               navigate("/admin", { replace: true });
               break;
             case "Department":
@@ -119,7 +104,7 @@ const Login = () => {
               navigate("/president", { replace: true });
               break;
             default:
-              setError("Unauthorized role");
+              navigate("/home", { replace: true });
           }
         } else {
           setError("Unexpected status");
@@ -127,7 +112,7 @@ const Login = () => {
       } else {
         setError("Invalid login credentials");
       }
-      */
+      setLoading(false);
     } catch (err) {
       console.log(err);
       if (err.response?.data?.error === "Invalid email or password") {

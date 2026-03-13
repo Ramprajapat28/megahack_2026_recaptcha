@@ -25,7 +25,7 @@ const Adm_TestStudentList = () => {
   // Function to handle Excel download
   const handleExportExcel = async () => {
     try {
-      let API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+      let API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
       const response = await axios.get(
         `${API_BASE_URL}/api/export/result/excel/${examId}`,
         {
@@ -56,13 +56,13 @@ const Adm_TestStudentList = () => {
 
     const searchResults = term
       ? students.filter(
-          (student) =>
-            student.student_name.toLowerCase().includes(term) ||
-            student.student_email.toLowerCase().includes(term) ||
-            student.Date.toLowerCase().includes(term) ||
-            student.status.toLowerCase().includes(term),
-          // student.total_score.toLowerCase().includes(term)
-        )
+        (student) =>
+          student.student_name.toLowerCase().includes(term) ||
+          student.student_email.toLowerCase().includes(term) ||
+          student.Date.toLowerCase().includes(term) ||
+          student.status.toLowerCase().includes(term),
+        // student.total_score.toLowerCase().includes(term)
+      )
       : students;
 
     setFilteredStudents(searchResults);
@@ -77,7 +77,7 @@ const Adm_TestStudentList = () => {
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
-        let API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+        let API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
         const response = await axios.get(
           `${API_BASE_URL}/api/exams/results/allpast/${examId}`,
           {
@@ -128,9 +128,8 @@ const Adm_TestStudentList = () => {
     <div className="min-h-screen flex">
       <div
         ref={sidebarRef}
-        className={`fixed top-0 left-0 h-full bg-gray-50 text-white z-50 transform ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } transition-transform duration-300 ease-in-out w-64 xl:static xl:translate-x-0`}
+        className={`fixed top-0 left-0 h-full bg-gray-50 text-white z-50 transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } transition-transform duration-300 ease-in-out w-64 xl:static xl:translate-x-0`}
       >
         <Adm_Sidebar />
       </div>
@@ -263,9 +262,8 @@ const Adm_TestStudentList = () => {
                 {pageNumbers.map((p) => (
                   <div
                     key={p}
-                    className={`w-8 h-8 flex items-center justify-center mx-1 cursor-pointer ${
-                      page === p ? "bg-blue-300 rounded-md" : "bg-white"
-                    }`}
+                    className={`w-8 h-8 flex items-center justify-center mx-1 cursor-pointer ${page === p ? "bg-blue-300 rounded-md" : "bg-white"
+                      }`}
                     onClick={() => setPage(p)}
                   >
                     {p}

@@ -33,7 +33,7 @@ const Adm_ViewQuestionCard = ({
     });
   };
   const handleDeleteQuestion = async () => {
-    let API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+    let API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
     const response = await axios.delete(`${API_BASE_URL}/api/exams/questions/${exam_id}/${id}`, {
       withCredentials: true,
     });

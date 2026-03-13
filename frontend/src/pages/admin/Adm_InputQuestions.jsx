@@ -80,7 +80,7 @@ const Adm_InputQuestions = () => {
     formData.append("questions", selectedFile);
 
     try {
-      let API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+      let API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
       const response = await axios.post(`${API_BASE_URL}/api/exams/${examId}/questions`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -117,7 +117,7 @@ const Adm_InputQuestions = () => {
         navigate("/admin/viewquestions");
         return;
       }
-      let API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+      let API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
 
       // Upload the image and display it
       const response = await axios.post(`${API_BASE_URL}/api/upload-image`, formData, {
@@ -237,69 +237,69 @@ const Adm_InputQuestions = () => {
   // const handleRemoveImage = () => {
   //   setImageUrl("");
   // };
- const handleRemoveImage = async () => {
-  if (!questionId) {
-    // If no questionId, just clear the image URL from UI
-    setImageUrl("");
-    return;
-  }
-
-  // Extract image key from the imageUrl
-  let imageKey = "";
-  if (imageUrl) {
-    try {
-      // Extract the image key from the URL
-      const urlParts = imageUrl.split('/');
-      let fullFileName = urlParts[urlParts.length - 1]; // Get the last part (filename)
-      
-      // Remove query parameters if present
-      fullFileName = fullFileName.split('?')[0];
-      
-      // Remove timestamp prefix (format: "1752240241319-filename.ext")
-      if (fullFileName.includes('-')) {
-        imageKey = fullFileName.split('-').slice(1).join('-'); // Remove first part before first dash
-      } else {
-        imageKey = fullFileName; // If no dash, use full filename
-      }
-    } catch (error) {
-      console.error("Error extracting image key from URL:", error);
-      alert("Unable to extract image key from URL.");
+  const handleRemoveImage = async () => {
+    if (!questionId) {
+      // If no questionId, just clear the image URL from UI
+      setImageUrl("");
       return;
     }
-  }
 
-  if (!imageKey) {
-    alert("No image key found to delete.");
-    return;
-  }
+    // Extract image key from the imageUrl
+    let imageKey = "";
+    if (imageUrl) {
+      try {
+        // Extract the image key from the URL
+        const urlParts = imageUrl.split('/');
+        let fullFileName = urlParts[urlParts.length - 1]; // Get the last part (filename)
 
-  try {
-    let API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+        // Remove query parameters if present
+        fullFileName = fullFileName.split('?')[0];
 
-    // Call backend to delete image with imageKey as URL parameter
-    const response = await axios.delete(
-      `${API_BASE_URL}/api/delete-image/${imageKey}`,
-      {
-        withCredentials: true,
+        // Remove timestamp prefix (format: "1752240241319-filename.ext")
+        if (fullFileName.includes('-')) {
+          imageKey = fullFileName.split('-').slice(1).join('-'); // Remove first part before first dash
+        } else {
+          imageKey = fullFileName; // If no dash, use full filename
+        }
+      } catch (error) {
+        console.error("Error extracting image key from URL:", error);
+        alert("Unable to extract image key from URL.");
+        return;
       }
-    );
+    }
 
-    if (response.data.success) {
-      setImageUrl(""); // Clear image from UI
-      alert("Image deleted successfully.");
-    } else {
-      alert("Failed to delete image.");
+    if (!imageKey) {
+      alert("No image key found to delete.");
+      return;
     }
-  } catch (error) {
-    console.error("Error deleting image:", error);
-    if (error.response?.data?.message) {
-      alert(`Error: ${error.response.data.message}`);
-    } else {
-      alert("An error occurred while deleting the image.");
+
+    try {
+      let API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
+
+      // Call backend to delete image with imageKey as URL parameter
+      const response = await axios.delete(
+        `${API_BASE_URL}/api/delete-image/${imageKey}`,
+        {
+          withCredentials: true,
+        }
+      );
+
+      if (response.data.success) {
+        setImageUrl(""); // Clear image from UI
+        alert("Image deleted successfully.");
+      } else {
+        alert("Failed to delete image.");
+      }
+    } catch (error) {
+      console.error("Error deleting image:", error);
+      if (error.response?.data?.message) {
+        alert(`Error: ${error.response.data.message}`);
+      } else {
+        alert("An error occurred while deleting the image.");
+      }
     }
-  }
-};
-  
+  };
+
   const handleSubmit = async () => {
     if (
       (question && options.every((option) => String(option).trim() !== "")) ||
@@ -346,7 +346,7 @@ const Adm_InputQuestions = () => {
 
       try {
         if (!questionId) {
-          let API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+          let API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
           await axios.post(
             `${API_BASE_URL}/api/exams/questions/${examId}`,
             payload,
@@ -362,7 +362,7 @@ const Adm_InputQuestions = () => {
           setQuestionCount((prevCount) => prevCount + 1);
           navigate("/admin/input?category=");
         } else {
-          let API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+          let API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
           await axios.put(
             `${API_BASE_URL}/api/exams/questions/${examId}/${questionId}`,
             payload,
@@ -410,9 +410,8 @@ const Adm_InputQuestions = () => {
     <div className="min-h-screen flex">
       <div
         ref={sidebarRef}
-        className={`fixed top-0 left-0 h-full bg-gray-50 text-white z-50 transform ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } transition-transform duration-300 ease-in-out w-64 xl:static xl:translate-x-0`}
+        className={`fixed top-0 left-0 h-full bg-gray-50 text-white z-50 transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } transition-transform duration-300 ease-in-out w-64 xl:static xl:translate-x-0`}
       >
         <Adm_Sidebar />
       </div>
@@ -579,14 +578,12 @@ const Adm_InputQuestions = () => {
                     {/* Toggle Button */}
                     <button
                       onClick={() => handleToggleChange(index)}
-                      className={`relative w-12 h-6 rounded-full transition-all duration-300 ${
-                        toggles[index] ? "bg-[#449800]" : "bg-gray-300"
-                      }`}
+                      className={`relative w-12 h-6 rounded-full transition-all duration-300 ${toggles[index] ? "bg-[#449800]" : "bg-gray-300"
+                        }`}
                     >
                       <div
-                        className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-all duration-300 transform ${
-                          toggles[index] ? "translate-x-6" : "translate-x-0"
-                        }`}
+                        className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-all duration-300 transform ${toggles[index] ? "translate-x-6" : "translate-x-0"
+                          }`}
                       />
                     </button>
                     {/* Remove Option Button */}
@@ -632,7 +629,7 @@ const Adm_InputQuestions = () => {
               className="bg-gray-200 text-gray-900 px-3 py-2 rounded hover:bg-gray-300 border border-gray-700 opacity-90 hover:opacity-100"
               onClick={handleCancel}
             >
-             Clear
+              Clear
             </button>
           </div>
         </div>

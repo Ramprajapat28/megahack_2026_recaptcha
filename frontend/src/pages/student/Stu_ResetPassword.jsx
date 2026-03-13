@@ -38,7 +38,7 @@ const Stu_ResetPassword = () => {
   useEffect(() => {
     const verifyToken = async () => {
       try {
-        let API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+        let API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
         await axios.get(`${API_BASE_URL}/api/users/verify-reset-token`, {
           headers: {
             resettoken: resettoken,
@@ -66,7 +66,7 @@ const Stu_ResetPassword = () => {
 
     try {
       const encryptedPassword = await encryptPassword(newPassword);
-      let API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+      let API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
       await axios.post(`${API_BASE_URL}/api/users/reset-password`, {
         resettoken: resettoken,
         password: encryptedPassword,
@@ -125,9 +125,8 @@ const Stu_ResetPassword = () => {
           <button
             type="submit"
             disabled={loading}
-            className={`w-full px-4 py-2 text-white bg-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-1 ${
-              loading ? "bg-gray-500 cursor-not-allowed" : "bg-custom_blue"
-            }`}
+            className={`w-full px-4 py-2 text-white bg-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-1 ${loading ? "bg-gray-500 cursor-not-allowed" : "bg-custom_blue"
+              }`}
           >
             {loading ? "Resetting..." : "Reset Password"}
           </button>

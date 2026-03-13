@@ -86,7 +86,7 @@ const Adm_StudentList = () => {
     formData.append("Files", selectedFile); // Appending the file to formData
 
     try {
-      let API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+      let API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
 
       let response = await axios.post(`${API_BASE_URL}/api/users/upload?role=Student`, formData, {
         headers: {
@@ -145,29 +145,29 @@ const Adm_StudentList = () => {
   const fetchStudents = async () => {
     try {
       setLoading(true); // Ensure loading is set to true at the start
-     
-      
-      let API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+
+
+      let API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
       const response = await axios.get(`${API_BASE_URL}/api/users/?role=Student`, {
         withCredentials: true,
       });
       const studentData = response.data.users;
       setStudents(studentData);
-  
+
     } catch (error) {
       console.error("Error fetching students:", error);
     } finally {
       // Add a small delay to ensure loader is visible
       setTimeout(() => {
         setLoading(false);
-      
+
       }, 500); // 500ms delay - adjust as needed
     }
   };
 
   // Fetch data from API on component mount
   useEffect(() => {
-    
+
     fetchStudents();
   }, [deletedUsers]);
 

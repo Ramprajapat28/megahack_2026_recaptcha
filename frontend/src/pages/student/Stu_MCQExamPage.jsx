@@ -25,8 +25,8 @@ const Stu_MCQExamPage = () => {
 
   const examId = location.state?.examId;
   const Duration = location.state?.Duration;
-const questions = useSelector((state) => state.questions.questions);
-// console.log(questions)
+  const questions = useSelector((state) => state.questions.questions);
+  // console.log(questions)
   const enableFullscreen = () => {
     const rootElement = document.documentElement;
     if (rootElement.requestFullscreen) {
@@ -37,45 +37,45 @@ const questions = useSelector((state) => state.questions.questions);
       console.warn("Fullscreen API is not supported in this browser.");
     }
   };
-const buildResponsesPayload = (questions) => {
-  return questions.map((q) => ({
-    question_id: q.question_id,
-    selected_option: q.selectedOption || null,
-    selected_options: q.selectedOptions || null,
-    text_answer: q.textAnswer || null,
-    question_type: q.question_type
-  }));
-};
+  const buildResponsesPayload = (questions) => {
+    return questions.map((q) => ({
+      question_id: q.question_id,
+      selected_option: q.selectedOption || null,
+      selected_options: q.selectedOptions || null,
+      text_answer: q.textAnswer || null,
+      question_type: q.question_type
+    }));
+  };
 
   const submitFinalResponse = async (questions) => {
-  const responses = buildResponsesPayload(questions); // 👈 prepare payload
-// console.log(responses);
-  try {
-    const API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
-    const url = `${API_BASE_URL}/api/exams/responses/final/${examId}`;
-    await axios.put(url, { responses }, { withCredentials: true });
-    console.log("Final response submitted successfully");
-  } catch (error) {
-    console.error("Error submitting final response:", error);
-    throw error;
-  }
-};
+    const responses = buildResponsesPayload(questions); // 👈 prepare payload
+    // console.log(responses);
+    try {
+      const API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
+      const url = `${API_BASE_URL}/api/exams/responses/final/${examId}`;
+      await axios.put(url, { responses }, { withCredentials: true });
+      console.log("Final response submitted successfully");
+    } catch (error) {
+      console.error("Error submitting final response:", error);
+      throw error;
+    }
+  };
 
   const handleSubmitTest = async (questions) => {
     if (isSubmitting || testSubmitted) return; // Prevent multiple submissions
-    
+
     setIsSubmitting(true);
     setTestSubmitted(true);
-    
+
     try {
       await submitFinalResponse(questions);
       socketRef.current?.emit("submit_responses");
-      
+
       // Clear Redux state
       dispatch(clearExamId(examId));
       dispatch(clearQuestions());
       dispatch(resetTabSwitchCount()); // Reset tab switch count
-      
+
       alert("Test submitted successfully!");
       navigate("/home", { replace: true });
     } catch (error) {
@@ -99,7 +99,7 @@ const buildResponsesPayload = (questions) => {
 
 
 
-  
+
 
   // Disable keyboard input
   useEffect(() => {
@@ -202,7 +202,7 @@ const buildResponsesPayload = (questions) => {
         )}
 
         <Question socketRef={socketRef} />
-        <Sidebar name={userName} onSubmitTest={()=>handleSubmitTest(questions)} />
+        <Sidebar name={userName} onSubmitTest={() => handleSubmitTest(questions)} />
       </div>
     </div>
   );

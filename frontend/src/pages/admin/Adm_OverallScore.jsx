@@ -14,10 +14,10 @@ function Adm_OverallScore() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const sidebarRef = useRef(null);
 
-  
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   // Combined state for all chart data
   const [chartData, setChartData] = useState({
     avgData: [],
@@ -31,41 +31,41 @@ function Adm_OverallScore() {
 
   // Single useEffect to handle data fetching and processing
   useEffect(() => {
-  const fetchAnalyticsData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      let API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
-       
-      const url = `${API_BASE_URL}/api/analysis/overallAnalysis`;
-      const response = await axios.get(url, { withCredentials: true });
-      
-      // Access the response data directly
-      const analysisData = response.data;
-      
-      console.log("Analysis Data:", analysisData); // Debug log
-      
-      // Process and set all data at once
-      if (analysisData) {
-        setChartData({
-          avgData: analysisData.dept_avg || [],
-          topPerformers: analysisData.top_performers || [],
-          bottomPerformers: analysisData.bottom_performers || [],
-          overallAccuracyRate: { overall_accuracy_rate: analysisData.overall_accuracy_rate || 0 },
-          performanceOverTime: analysisData.performance_over_time || []
-        });
-      }
-      
-    } catch (err) {
-      console.error("Error fetching data:", err);
-      setError("Failed to load data. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    const fetchAnalyticsData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        let API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
 
-  fetchAnalyticsData();
-}, []);
+        const url = `${API_BASE_URL}/api/analysis/overallAnalysis`;
+        const response = await axios.get(url, { withCredentials: true });
+
+        // Access the response data directly
+        const analysisData = response.data;
+
+        console.log("Analysis Data:", analysisData); // Debug log
+
+        // Process and set all data at once
+        if (analysisData) {
+          setChartData({
+            avgData: analysisData.dept_avg || [],
+            topPerformers: analysisData.top_performers || [],
+            bottomPerformers: analysisData.bottom_performers || [],
+            overallAccuracyRate: { overall_accuracy_rate: analysisData.overall_accuracy_rate || 0 },
+            performanceOverTime: analysisData.performance_over_time || []
+          });
+        }
+
+      } catch (err) {
+        console.error("Error fetching data:", err);
+        setError("Failed to load data. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAnalyticsData();
+  }, []);
 
 
 
@@ -73,7 +73,7 @@ function Adm_OverallScore() {
   const overallAccuracyRateData = React.useMemo(() => {
     const accuracyRate = Number(chartData.overallAccuracyRate?.overall_accuracy_rate || 0);
     const accuracyPercentage = Math.round(accuracyRate * 100);
-    
+
     return {
       title: "Overall Accuracy Rate",
       chartData: [
@@ -165,9 +165,8 @@ function Adm_OverallScore() {
       <div className="min-h-screen flex overflow-x-hidden bg-white">
         <div
           ref={sidebarRef}
-          className={`fixed top-0 left-0 h-full bg-gray-100 z-50 border-r-2 transform ${
-            sidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } transition-transform duration-300 ease-in-out w-64 xl:static xl:translate-x-0`}
+          className={`fixed top-0 left-0 h-full bg-gray-100 z-50 border-r-2 transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+            } transition-transform duration-300 ease-in-out w-64 xl:static xl:translate-x-0`}
         >
           <Adm_Sidebar />
         </div>
@@ -177,8 +176,8 @@ function Adm_OverallScore() {
           <div className="flex items-center justify-center h-screen">
             <div className="text-center">
               <p className="text-red-500 text-lg font-semibold mb-4">{error}</p>
-              <button 
-                onClick={handleRetry} 
+              <button
+                onClick={handleRetry}
                 className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
               >
                 Retry
@@ -194,9 +193,8 @@ function Adm_OverallScore() {
     <div className="min-h-screen flex overflow-x-hidden bg-white">
       <div
         ref={sidebarRef}
-        className={`fixed top-0 left-0 h-full bg-gray-100 z-50 border-r-2 transform ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } transition-transform duration-300 ease-in-out w-64 xl:static xl:translate-x-0`}
+        className={`fixed top-0 left-0 h-full bg-gray-100 z-50 border-r-2 transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } transition-transform duration-300 ease-in-out w-64 xl:static xl:translate-x-0`}
       >
         <Adm_Sidebar />
       </div>

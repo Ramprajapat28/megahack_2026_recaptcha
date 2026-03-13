@@ -43,7 +43,7 @@ const Adm_DraftTest = () => {
       try {
         setLoading(true);
         setError(null);
-        let API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+        let API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
         const response = await axios.get(`${API_BASE_URL}/api/exams/drafts?role=TPO`, {
           withCredentials: true,
         });
@@ -89,9 +89,8 @@ const Adm_DraftTest = () => {
       {/* Sidebar Section */}
       <div
         ref={sidebarRef}
-        className={`fixed top-0 left-0 h-full bg-gray-50 text-white z-50 transform ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } transition-transform duration-300 ease-in-out w-64 xl:static xl:translate-x-0`}
+        className={`fixed top-0 left-0 h-full bg-gray-50 text-white z-50 transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } transition-transform duration-300 ease-in-out w-64 xl:static xl:translate-x-0`}
       >
         <Adm_Sidebar />
       </div>
@@ -161,11 +160,10 @@ const Adm_DraftTest = () => {
                 {/* Previous Page Button */}
                 <button
                   onClick={() => handlePageChange(currentPage - 1)}
-                  className={`p-2 mx-1 rounded ${
-                    currentPage === 1
+                  className={`p-2 mx-1 rounded ${currentPage === 1
                       ? "opacity-50 cursor-not-allowed"
                       : "hover:bg-gray-200"
-                  }`}
+                    }`}
                   disabled={currentPage === 1}
                 >
                   &lt;
@@ -176,11 +174,10 @@ const Adm_DraftTest = () => {
                   <button
                     key={i + 1}
                     onClick={() => handlePageChange(i + 1)}
-                    className={`px-3 py-1 mx-1 rounded ${
-                      currentPage === i + 1
+                    className={`px-3 py-1 mx-1 rounded ${currentPage === i + 1
                         ? "bg-blue-500 text-white"
                         : "hover:bg-gray-200"
-                    }`}
+                      }`}
                   >
                     {i + 1}
                   </button>
@@ -189,11 +186,10 @@ const Adm_DraftTest = () => {
                 {/* Next Page Button */}
                 <button
                   onClick={() => handlePageChange(currentPage + 1)}
-                  className={`p-2 mx-1 rounded ${
-                    currentPage === totalPages
+                  className={`p-2 mx-1 rounded ${currentPage === totalPages
                       ? "opacity-50 cursor-not-allowed"
                       : "hover:bg-gray-200"
-                  }`}
+                    }`}
                   disabled={currentPage === totalPages}
                 >
                   &gt;

@@ -80,7 +80,7 @@ const Adm_McqGenerator = ({ onClose }) => {
     const payload = { questions };
 
     try {
-      const API_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL;
+      const API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
       const url = `${API_BASE_URL}/api/export/ai_generated_questions`;
 
       const response = await axios.post(url, payload, {
@@ -382,9 +382,8 @@ const Adm_McqGenerator = ({ onClose }) => {
     <div className="min-h-screen flex bg-white">
       <div
         ref={sidebarRef}
-        className={`fixed top-0 left-0 h-full bg-gray-100 text-white z-50 transform ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } transition-transform duration-300 ease-in-out w-64 xl:static xl:translate-x-0`}
+        className={`fixed top-0 left-0 h-full bg-gray-100 text-white z-50 transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } transition-transform duration-300 ease-in-out w-64 xl:static xl:translate-x-0`}
       >
         <div>
           <Adm_Sidebar testsData={testsData} />
