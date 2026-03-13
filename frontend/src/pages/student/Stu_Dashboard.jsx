@@ -620,7 +620,7 @@ function Stu_Dashboard() {
                     status={test.status}
                     questionCount={test.total_questions}
                     isEligible={test.iseligibletoattempt}
-                    lastDate={formatToReadableDate(test.created_at)}
+                    lastDate={formatToReadableDate(test.start_time || test.created_at)}
                   />
                 ))
               ) : (

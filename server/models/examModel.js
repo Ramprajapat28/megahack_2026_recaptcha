@@ -130,34 +130,37 @@ const getExamsByStatusforadmin = async (status) => {
 
 const getExamsForUser = async (status, branches, years) => {
 
-  let query = dbWrite("exams")
+  let query = dbWrite("exams as e")
+    .leftJoin("questions as q", "e.exam_id", "q.exam_id")
     .select(
-      "exam_id",
-      "exam_name",
-      "duration",
-      "start_time",
-      "end_time",
-      "status"
+      "e.exam_id",
+      "e.exam_name",
+      "e.duration",
+      "e.start_time",
+      "e.end_time",
+      "e.status",
+      dbWrite.raw("COUNT(q.question_id) as total_questions")
     )
-    .where("status", status);
+    .where("e.status", status)
+    .groupBy("e.exam_id", "e.exam_name", "e.duration", "e.start_time", "e.end_time", "e.status");
 
   if (branches?.length) {
     query.whereRaw(
-      "target_branches && ARRAY[?]::branch_enum[]",
+      "e.target_branches && ARRAY[?]::branch_enum[]",
       [branches[0]]
     );
   }
 
   if (years?.length) {
     query.whereRaw(
-      "target_years && ARRAY[?]::year_enum[]",
+      "e.target_years && ARRAY[?]::year_enum[]",
       [years[0]]
     );
   }
 
   console.log("Generated SQL:", query.toString());
 
-  const exams = await query.orderBy("start_time", "asc");
+  const exams = await query.orderBy("e.start_time", "asc");
 
   console.log("Exams Found:", exams);
 
