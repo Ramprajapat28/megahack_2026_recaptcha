@@ -1,5 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 import uvicorn
 import sys
@@ -19,6 +21,10 @@ from tutor import (
 )
 from speech import SpeechTranscript
 
+# Add ai-interview folder to path
+sys.path.append(os.path.join(os.path.dirname(__file__), 'ai-interview'))
+from interviewer import start_interview, generate_interview_response
+
 app = FastAPI(
     title="MegaHack 2026 - AI Backend API",
     description="AI Question Generator + AI Tutor with Text & Voice support",
@@ -34,10 +40,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Valid category values matching the DB enum
+CATEGORY_ENUM = [
+    "quantitative aptitude",
+    "logical reasoning",
+    "verbal ability",
+    "technical",
+    "general knowledge"
+]
+
 class QuestionRequest(BaseModel):
     topic: str
     difficulty: str
     job_description: str
+    category: str  # One of the CATEGORY_ENUM values
     num_questions: int = 5
 
 @app.post("/api/generate-questions")
@@ -45,14 +61,19 @@ async def generate_questions_api(request: QuestionRequest):
     try:
         if request.num_questions > 20:
             raise HTTPException(status_code=400, detail="Maximum 20 questions allowed per request.")
-            
+        if request.category.strip().lower() not in CATEGORY_ENUM:
+            raise HTTPException(status_code=400, detail=f"Invalid category. Must be one of: {', '.join(CATEGORY_ENUM)}")
+
         result = generate_questions(
             topic=request.topic,
             difficulty=request.difficulty,
             job_description=request.job_description,
+            category=request.category,
             num_questions=request.num_questions
         )
         return result
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -61,6 +82,7 @@ class JDQuestionRequest(BaseModel):
     skills: str
     experience: str
     difficulty: str
+    category: str  # One of the CATEGORY_ENUM values
     num_questions: int = 5
 
 @app.post("/api/generate/jd")
@@ -68,15 +90,20 @@ async def generate_jd_questions_api(request: JDQuestionRequest):
     try:
         if request.num_questions > 20:
             raise HTTPException(status_code=400, detail="Maximum 20 questions allowed per request.")
-            
+        if request.category.strip().lower() not in CATEGORY_ENUM:
+            raise HTTPException(status_code=400, detail=f"Invalid category. Must be one of: {', '.join(CATEGORY_ENUM)}")
+
         result = generate_jd_questions(
             role=request.role,
             skills=request.skills,
             experience=request.experience,
             difficulty=request.difficulty,
+            category=request.category,
             num_questions=request.num_questions
         )
         return result
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -84,6 +111,7 @@ class CompanyQuestionRequest(BaseModel):
     company: str
     role: str
     difficulty: str
+    category: str  # One of the CATEGORY_ENUM values
     num_questions: int = 5
 
 @app.post("/api/generate/company")
@@ -91,19 +119,30 @@ async def generate_company_questions_api(request: CompanyQuestionRequest):
     try:
         if request.num_questions > 20:
             raise HTTPException(status_code=400, detail="Maximum 20 questions allowed per request.")
-            
+        if request.category.strip().lower() not in CATEGORY_ENUM:
+            raise HTTPException(status_code=400, detail=f"Invalid category. Must be one of: {', '.join(CATEGORY_ENUM)}")
+
         result = generate_company_questions(
             company=request.company,
             role=request.role,
             difficulty=request.difficulty,
+            category=request.category,
             num_questions=request.num_questions
         )
         return result
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/")
+@app.get("/", response_class=HTMLResponse)
 def read_root():
+    html_path = os.path.join(os.path.dirname(__file__), 'ai-interview', 'index.html')
+    with open(html_path, 'r', encoding='utf-8') as f:
+        return HTMLResponse(content=f.read())
+
+@app.get("/info")
+def api_info():
     return {
         "message": "Welcome to MegaHack 2026 AI Backend",
         "endpoints": {
@@ -114,6 +153,10 @@ def read_root():
                 "/api/tutor/followup",
                 "/api/tutor/related-topics",
                 "/api/tutor/validate-answer"
+            ],
+            "ai_interviewer": [
+                "/api/interview/start",
+                "/api/interview/chat"
             ]
         }
     }
@@ -258,6 +301,50 @@ async def tutor_validate_answer(request: ValidateAnswerRequest):
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# ===============================
+# AI INTERVIEWER ENDPOINTS
+# ===============================
+
+class InterviewStartRequest(BaseModel):
+    role: str
+    difficulty: str
+
+@app.post("/api/interview/start")
+async def api_interview_start(request: InterviewStartRequest):
+    try:
+        if not request.role.strip() or not request.difficulty.strip():
+            raise HTTPException(status_code=400, detail="Role and difficulty must be provided.")
+            
+        initial_message = start_interview(role=request.role, difficulty=request.difficulty)
+        return {"response": initial_message}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+class InterviewChatRequest(BaseModel):
+    role: str
+    difficulty: str
+    chat_history: List[ChatMessage] = []
+    user_message: str
+
+@app.post("/api/interview/chat")
+async def api_interview_chat(request: InterviewChatRequest):
+    try:
+        if not request.user_message.strip():
+            raise HTTPException(status_code=400, detail="User message cannot be empty.")
+            
+        history = [m.model_dump() for m in request.chat_history]
+        
+        reply = generate_interview_response(
+            role=request.role,
+            difficulty=request.difficulty,
+            chat_history=history,
+            user_message=request.user_message
+        )
+        return {"response": reply}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 if __name__ == "__main__":
     uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
