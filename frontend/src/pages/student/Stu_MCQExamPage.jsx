@@ -23,6 +23,7 @@ const Stu_MCQExamPage = () => {
   const [timeUp, setTimeUp] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false); // Add loading state
   const [remainingTime, setRemainingTime] = useState(0);
+  const isSubmittingRef = useRef(false);
 
   const examId = location.state?.examId;
   const Duration = location.state?.Duration;
@@ -62,14 +63,16 @@ const Stu_MCQExamPage = () => {
     }
   };
 
-  const handleSubmitTest = async (questions) => {
-    if (isSubmitting || testSubmitted) return; // Prevent multiple submissions
+  const handleSubmitTest = async (questionsArg) => {
+    const questionsToSubmit = questionsArg || questions;
+    if (isSubmittingRef.current || isSubmitting || testSubmitted) return; // Prevent multiple submissions
 
+    isSubmittingRef.current = true;
     setIsSubmitting(true);
     setTestSubmitted(true);
 
     try {
-      await submitFinalResponse(questions);
+      await submitFinalResponse(questionsToSubmit);
       // socketRef.current?.emit("submit_responses");
 
        socketRef.current?.emit("submit_responses", { exam_id: examId });
@@ -84,6 +87,7 @@ const Stu_MCQExamPage = () => {
     } catch (error) {
       console.error("Error during test submission:", error);
       alert("There was an error submitting your test. Please try again.");
+      isSubmittingRef.current = false;
       setIsSubmitting(false);
       setTestSubmitted(false);
     }

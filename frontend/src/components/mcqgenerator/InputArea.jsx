@@ -128,10 +128,10 @@ const InputAreaComponent = ({
               <label className="block text-xs font-medium text-gray-600 mb-1">Questions (1-20)</label>
               <input
                 type="number"
-                min="1"
+                min="0"
                 max="20"
                 value={numQuestions}
-                onChange={(e) => setNumQuestions(parseInt(e.target.value) || 5)}
+                onChange={(e) => setNumQuestions(parseInt(e.target.value))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
               />
             </div>
@@ -224,10 +224,10 @@ const InputAreaComponent = ({
               <label className="block text-xs font-medium text-gray-600 mb-1">Questions (1-20)</label>
               <input
                 type="number"
-                min="1"
+                min="0"
                 max="20"
                 value={numQuestions}
-                onChange={(e) => setNumQuestions(parseInt(e.target.value) || 5)}
+                onChange={(e) => setNumQuestions(parseInt(e.target.value) )}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
               />
             </div>
@@ -315,10 +315,10 @@ const InputAreaComponent = ({
               <label className="block text-xs font-medium text-gray-600 mb-1">Questions (1-20)</label>
               <input
                 type="number"
-                min="1"
+                min="0"
                 max="20"
                 value={numQuestions}
-                onChange={(e) => setNumQuestions(parseInt(e.target.value) || 5)}
+                onChange={(e) => setNumQuestions(parseInt(e.target.value) )}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
               />
             </div>

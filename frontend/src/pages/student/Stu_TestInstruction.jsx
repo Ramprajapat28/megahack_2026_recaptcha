@@ -21,6 +21,7 @@ const Stu_TestInstruction = () => {
 
   const exam = useSelector((state) => state.exam.exam);
   const questions = useSelector((state) => state.questions.questions);
+  const isInitializingRef = useRef(false); // Prevents double initialization in StrictMode
 
   // console.log('exam',exam);
 
@@ -32,9 +33,13 @@ const Stu_TestInstruction = () => {
 
   useEffect(() => {
     const checkAndInitializeResponses = async () => {
+      if (isInitializingRef.current) return;
+      isInitializingRef.current = true;
+
       // ✅ 1. If questions are already in Redux, skip fetch
       if (questions && questions.length > 0) {
         console.log("✅ Using cached questions from Redux");
+        isInitializingRef.current = false;
         return;
       }
 
@@ -99,6 +104,8 @@ const Stu_TestInstruction = () => {
         }
       } catch (error) {
         console.error("❌ Error in initiating responses:", error.response || error);
+      } finally {
+        isInitializingRef.current = false;
       }
     };
 

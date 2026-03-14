@@ -32,8 +32,6 @@ const Question = ({ socketRef, remainingTime }) => {
   // Local state for multiple options, text answers, and socket timer
   const [multipleAnswers, setMultipleAnswers] = useState({});
   const [textAnswers, setTextAnswers] = useState({});
-  const [timeUp, setTimeUp] = useState(false);
-  const [testSubmitted, setTestSubmitted] = useState(false);
 
   // Local state to track unsaved changes and prevent multiple requests
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -53,30 +51,6 @@ const Question = ({ socketRef, remainingTime }) => {
       .toString()
       .padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
-
-  const submitFinalResponse = async () => {
-    const API_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
-    const url = `${API_BASE_URL}/api/exams/responses/final/${examId}`;
-    await axios.put(url, {}, { withCredentials: true });
-  };
-
-  const handleSubmitTest = async () => {
-    setTestSubmitted(true);
-    await submitFinalResponse();
-    socketRef.current?.emit("submit_responses", { exam_id: examId });
-    dispatch(clearExamId(examId));
-    dispatch(clearQuestions());
-    alert("Test submitted successfully!");
-    navigate("/home", { replace: true });
-  };
-
-  // Socket connection and timer management
-
-
-  // Handle time up
-  useEffect(() => {
-    if (timeUp && !isSubmitting) handleSubmitTest(questions);
-  }, [timeUp]);
 
   // Initialize local state with existing answers (for when user returns after internet issues)
   useEffect(() => {
