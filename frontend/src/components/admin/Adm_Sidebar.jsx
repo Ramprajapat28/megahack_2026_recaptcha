@@ -28,7 +28,7 @@ const Adm_Sidebar = () => {
 
   return (
     <div className="fixed left-0 top-0 w-64 h-full p-5 font-sans z-50">
-      <h2 className="text-blue-700 text-4xl font-bold mb-12 font-sans">Aptitude</h2>
+      <h2 className="text-blue-700 text-4xl font-bold mb-12 font-sans">PrepForge</h2>
       <ul className="list-none p-0 m-0">
         <li className="flex items-center p-2 cursor-pointer transition-colors duration-300 hover:text-blue-500 group">
           <NavLink 

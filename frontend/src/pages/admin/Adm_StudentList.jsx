@@ -326,7 +326,7 @@ const Adm_StudentList = () => {
               Import Students
             </h1>
             <h1 className="text-black font-poppins text-[18px] font-medium leading-normal">
-              Register students to gain access to aptitude tests
+              Register students to gain access to PrepForge tests
             </h1>
           </div>
           <div className="flex ml-auto mr-9">

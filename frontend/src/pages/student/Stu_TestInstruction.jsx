@@ -180,7 +180,7 @@ const Stu_TestInstruction = () => {
                     </button>
 
                     <h2 className="text-xl font-bold text-gray-800 ml-24 sm:ml-52 xl:ml-0">
-                      Online Aptitude Test:{" "}
+                      Online PrepForge Test:{" "}
                       <span className="text-blue-600">{examItem.exam_name}</span>
                     </h2>
                   </div>

@@ -9,7 +9,7 @@ function Stu_Sidebar() {
 
   return (
     <div className="fixed left-0 top-0 w-64 h-full p-5 font-sans z-50">
-      <h2 className="text-blue-700 text-3xl font-bold mb-12">Aptitude</h2>
+      <h2 className="text-blue-700 text-3xl font-bold mb-12">PrepForge</h2>
       <ul className="list-none p-0 m-0">
         {/* Dashboard */}
         <li

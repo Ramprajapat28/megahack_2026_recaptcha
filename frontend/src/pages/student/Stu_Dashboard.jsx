@@ -529,7 +529,7 @@ function Stu_Dashboard() {
         {/* Main Content */}
         <div className="px-4">
           <h1 className="text-blue-700 text-2xl mt-4 font-medium">
-            Welcome to Atharva college Aptitude Portal
+            Welcome to Atharva college PrepForge
           </h1>
 
           {/* Filters Section */}

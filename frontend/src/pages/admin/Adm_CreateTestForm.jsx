@@ -133,7 +133,7 @@ const Adm_CreateTestPage = () => {
               />
             </svg>
           </button>
-          <h1 className="text-xl sm:text-2xl font-bold ml-52 xl:m-6">Create Aptitude Test</h1>
+          <h1 className="text-xl sm:text-2xl font-bold ml-52 xl:m-6">Create PrepForge Test</h1>
         </div>
 
         <div className="flex items-center mb-6 ml-5">
