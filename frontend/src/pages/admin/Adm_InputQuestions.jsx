@@ -441,7 +441,7 @@ const Adm_InputQuestions = () => {
               </svg>
             </button>
             <div className="text-2xl font-semibold text-center text-gray-800 ml-0 xl:ml-0">
-              Create Aptitude Test
+              Create PrepForge Test
             </div>
             <div className="flex ">
               <a

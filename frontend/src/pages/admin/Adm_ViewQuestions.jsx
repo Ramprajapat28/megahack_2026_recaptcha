@@ -162,7 +162,7 @@ const Adm_ViewQuestions = () => {
             </svg>
           </button>
           <h1 className="text-xl sm:text-2xl font-bold ml-20 sm:ml-52 xl:m-0">
-            Create Aptitude Test
+            Create PrepForge Test
           </h1>
         </div>
 
