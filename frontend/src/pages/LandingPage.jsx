@@ -332,8 +332,8 @@ export default function LandingPage() {
           transition: transform 0.3s cubic-bezier(.22,.61,.36,1), box-shadow 0.3s;
         }
         .lp-exam-card:hover { transform: translateY(-6px); box-shadow: 0 20px 52px rgba(0,0,0,0.14); }
-        .lp-exam-card-bg { position: absolute; inset: 0; border-radius: 20px; opacity: 0.92; }
-        .lp-exam-card > * { position: relative; z-index: 1; }
+        .lp-exam-card-bg { position: absolute; inset: 0; border-radius: 20px; opacity: 0.92; z-index: 0; }
+        .lp-exam-card > *:not(.lp-exam-card-bg) { position: relative; z-index: 10; }
         .lp-exam-icon { font-size: 2.4rem; margin-bottom: 16px; display: block; }
         .lp-exam-name { font-size: 1.6rem; font-weight: 900; color: #fff; letter-spacing: -0.5px; margin-bottom: 6px; }
         .lp-exam-full { font-size: 0.82rem; font-weight: 500; color: rgba(255,255,255,0.7); margin-bottom: 14px; }
@@ -344,27 +344,7 @@ export default function LandingPage() {
           border: 1px solid rgba(255,255,255,0.25); backdrop-filter: blur(4px);
         }
 
-        /* ── ROADMAP / WHAT'S COMING ── */
-        .lp-coming { background: #f8fafc; }
-        .lp-coming-grid {
-          display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr));
-          gap: 20px; padding-top: 52px;
-        }
-        .lp-coming-card {
-          border: 2px dashed #cbd5e1; border-radius: 20px; padding: 32px 26px;
-          background: #fff; transition: border-color 0.3s, transform 0.3s;
-          position: relative;
-        }
-        .lp-coming-card:hover { border-color: #93c5fd; transform: translateY(-4px); }
-        .lp-coming-chip {
-          position: absolute; top: 18px; right: 18px;
-          background: #f1f5f9; color: #64748b;
-          font-size: 0.62rem; font-weight: 800; letter-spacing: 0.1em;
-          text-transform: uppercase; padding: 3px 10px; border-radius: 100px;
-        }
-        .lp-coming-icon { font-size: 1.8rem; margin-bottom: 14px; }
-        .lp-coming-title { font-size: 1rem; font-weight: 800; color: #0d1f3c; margin-bottom: 8px; }
-        .lp-coming-desc { color: #64748b; font-size: 0.88rem; line-height: 1.6; }
+
 
         /* ── HOW IT WORKS ── */
         .lp-how { background: linear-gradient(180deg, #fff 0%, #eff6ff 100%); }
@@ -477,8 +457,8 @@ export default function LandingPage() {
       {/* ══ NAVBAR ═══════════════════════════════════ */}
       <nav className={`lp-nav${scrolled ? " lp-scrolled" : ""}`}>
         <a href="#" className="lp-brand">
-          <div className="lp-brand-logo">A</div>
-          <span className="lp-brand-name">Aptitude <span>Portal</span></span>
+          <div className="lp-brand-logo">P</div>
+          <span className="lp-brand-name">Prep<span>Forge</span></span>
         </a>
         <div className="lp-nav-links">
           <a href="#features" className="lp-nav-a">Features</a>
@@ -504,7 +484,7 @@ export default function LandingPage() {
 
         <div className="lp-hero-eyebrow">
           <div className="lp-live-dot" />
-          CSI Aptitude Portal · Megahack 2026
+          PrepForge · Megahack 2026
         </div>
 
         <h1 className="lp-hero-h1">
@@ -587,13 +567,11 @@ export default function LandingPage() {
             <FCard
               icon="🎙️" title="AI Interview Coach"
               desc="Practise mock interviews with an AI that adapts to your answers, gives real-time feedback, and tracks your improvement over time."
-              tag="Coming Soon"
               delay="0.28s"
             />
             <FCard
               icon="🧑‍🏫" title="AI Tutor"
               desc="Stuck on a concept? Ask your personal AI tutor for step-by-step explanations, worked examples, and concept summaries."
-              tag="Coming Soon"
               delay="0.35s"
             />
           </div>
@@ -663,51 +641,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ══ WHAT'S COMING ════════════════════════════ */}
-      <section id="coming" className="lp-section lp-coming">
-        <div className="lp-section-inner">
-          <div className="lp-section-label">Roadmap</div>
-          <h2 className="lp-section-h2">Exciting things on the way</h2>
-          <p className="lp-section-sub">
-            We're building the most complete student prep ecosystem — here's a sneak peek at what's next.
-          </p>
-          <div className="lp-coming-grid">
-            <div className="lp-coming-card">
-              <div className="lp-coming-chip">Q2 2026</div>
-              <div className="lp-coming-icon">🧑‍🏫</div>
-              <div className="lp-coming-title">AI Tutor</div>
-              <div className="lp-coming-desc">
-                Your 24/7 personal tutor that explains concepts, solves doubts, and creates custom revision plans based on your weaker areas.
-              </div>
-            </div>
-            <div className="lp-coming-card">
-              <div className="lp-coming-chip">Q3 2026</div>
-              <div className="lp-coming-icon">🎙️</div>
-              <div className="lp-coming-title">AI Interview Preparation</div>
-              <div className="lp-coming-desc">
-                Simulate real technical and HR interview rounds with an AI that evaluates your communication, logic, and coding — and tells you how to improve.
-              </div>
-            </div>
-            <div className="lp-coming-card">
-              <div className="lp-coming-chip">Q3 2026</div>
-              <div className="lp-coming-icon">🏆</div>
-              <div className="lp-coming-title">Live Contest Mode</div>
-              <div className="lp-coming-desc">
-                Compete with peers in timed live contests, see real-time leaderboards, and earn badges to showcase your skills on your profile.
-              </div>
-            </div>
-            <div className="lp-coming-card">
-              <div className="lp-coming-chip">Q4 2026</div>
-              <div className="lp-coming-icon">📱</div>
-              <div className="lp-coming-title">Mobile App</div>
-              <div className="lp-coming-desc">
-                Take your preparation on the go with native iOS and Android apps featuring offline access to question banks and flashcards.
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* ══ HOW IT WORKS ═════════════════════════════ */}
       <section id="how" className="lp-section lp-how">
         <div className="lp-section-inner">
@@ -769,7 +702,7 @@ export default function LandingPage() {
         <div className="lp-cta-inner">
           <h2 className="lp-cta-h2">Ready to start preparing smarter?</h2>
           <p className="lp-cta-sub">
-            Join thousands of students using the Aptitude Portal to crack competitive exams and land their dream jobs.
+            Join thousands of students using PrepForge to crack competitive exams and land their dream jobs.
           </p>
           <button
             id="cta-final-login-btn"
@@ -777,7 +710,7 @@ export default function LandingPage() {
             style={{ fontSize: "1.05rem", padding: "15px 40px" }}
             onClick={() => nav("/login")}
           >
-            Login to Portal
+            Login to PrepForge
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           </button>
         </div>
@@ -786,10 +719,10 @@ export default function LandingPage() {
       {/* ══ FOOTER ═══════════════════════════════════ */}
       <footer className="lp-footer">
         <div className="lp-footer-brand">
-          <div className="lp-footer-brand-logo">A</div>
-          <span><strong>Aptitude Portal</strong> · CSI Megahack 2026</span>
+          <div className="lp-footer-brand-logo">P</div>
+          <span><strong>PrepForge</strong> · Megahack 2026</span>
         </div>
-        <span>© 2026 All rights reserved · Built with ❤️ by the CSI team</span>
+        <span>© 2026 All rights reserved · Built with ❤️ by the team</span>
       </footer>
     </>
   );
